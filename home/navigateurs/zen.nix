@@ -25,14 +25,17 @@ in
     profiles.asap = {
       id = 0;
       isDefault = true;
-      search = commun.search // favoris;
-      settings = commun.settings // {
-        "zen.welcome-screen.seen" = true; # saute l'écran d'accueil
-        "ui.systemUsesDarkTheme" = 1; # interface en sombre
-        "browser.theme.toolbar-theme" = 0; # barres en sombre
-        "browser.theme.content-theme" = 0; # pages internes en sombre
-        "layout.css.prefers-color-scheme.content-override" = 0; # les sites passent en sombre s'ils le gèrent
-      };
+      search = commun.search;
+      settings =
+        commun.settings
+        // favoris
+        // {
+          "zen.welcome-screen.seen" = true; # saute l'écran d'accueil
+          "ui.systemUsesDarkTheme" = 1; # interface en sombre
+          "browser.theme.toolbar-theme" = 0; # barres en sombre
+          "browser.theme.content-theme" = 0; # pages internes en sombre
+          "layout.css.prefers-color-scheme.content-override" = 0; # les sites passent en sombre s'ils le gèrent
+        };
     };
   };
 
