@@ -90,6 +90,7 @@
     {
       nixosConfigurations.vm = mkHost "vm";
       nixosConfigurations.t470 = mkHost "t470";
+      nixosConfigurations.pc = mkHost "pc";
 
       # `nix run .#vm` : construit et lance la machine virtuelle, sans installation.
       apps.${system}.vm = {

@@ -1,6 +1,6 @@
 # TON UTILISATEUR (home-manager) : applis, dotfiles et rice.
 # Chaque brique du rice a son fichier dans home/bureau/.
-{ pkgs, ... }:
+{ lib, pkgs, host, ... }:
 
 {
   imports = [
@@ -15,7 +15,9 @@
     ./applis.nix # applis communes
     ./navigateurs/firefox.nix # réglages communs : navigateurs/navigateur-commun.nix
     ./navigateurs/zen.nix
-  ];
+  ]
+  # Réglages propres à la machine, s'ils existent : home/pc.nix, home/t470.nix…
+  ++ lib.optional (builtins.pathExists (./. + "/${host}.nix")) (./. + "/${host}.nix");
 
   home.username = "asap";
   home.homeDirectory = "/home/asap";
