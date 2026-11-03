@@ -1,4 +1,4 @@
-# SOCLE commun à toutes les machines : Nix, langue, utilisateur, son, réseau.
+# SOCLE commun à toutes les machines : Nix, langue, utilisateur, réseau, son, matériel.
 { pkgs, ... }:
 
 {
@@ -13,25 +13,24 @@
   time.timeZone = "Europe/Paris";
   i18n.defaultLocale = "fr_FR.UTF-8";
   console.keyMap = "fr";
-  # Disposition reprise par la plupart des compositeurs Wayland (via XKB).
-  services.xserver.xkb.layout = "fr";
 
   # ─── Utilisateur ───────────────────────────────────────────────────────
+  # bash reste le shell de connexion (il prépare la session) ;
+  # c'est le terminal (Ghostty) qui lance Nushell.
   users.users.asap = {
     isNormalUser = true;
     description = "asap";
     extraGroups = [ "wheel" "video" "audio" "networkmanager" "input" ];
     initialPassword = "nixos"; # à changer avec `passwd` sur une vraie machine
   };
-  security.sudo.wheelNeedsPassword = false; # confortable en VM ; à revoir sur une vraie machine
 
-  # Connexion automatique sur le premier terminal (tty1).
-  services.getty.autologinUser = "asap";
+  # ─── Réseau : NetworkManager, avec iwd comme moteur Wi-Fi ──────────────
+  networking.networkmanager = {
+    enable = true;
+    wifi.backend = "iwd";
+  };
 
-  # ─── Réseau ────────────────────────────────────────────────────────────
-  networking.networkmanager.enable = true;
-
-  # ─── Son (PipeWire) ────────────────────────────────────────────────────
+  # ─── Son : PipeWire (+ JACK pour Reaper) ───────────────────────────────
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -40,21 +39,17 @@
     jack.enable = true;
   };
 
-  # ─── Paquets de base (le reste ira dans home/asap.nix) ─────────────────
+  # ─── Matériel ──────────────────────────────────────────────────────────
+  hardware.bluetooth.enable = true;
+  services.udisks2.enable = true; # montage des clés USB (utilisé par udiskie)
+  services.power-profiles-daemon.enable = true; # modes économie / équilibré / performance
+  services.upower.enable = true; # niveau de batterie (pour waybar)
+
+  # ─── Paquets système de base (le reste est dans home/) ─────────────────
   environment.systemPackages = with pkgs; [
     git
-    neovim
     wget
     curl
-    htop
     unzip
-  ];
-  environment.variables.EDITOR = "nvim";
-
-  # ─── Polices ───────────────────────────────────────────────────────────
-  fonts.packages = with pkgs; [
-    noto-fonts
-    noto-fonts-color-emoji
-    nerd-fonts.jetbrains-mono
   ];
 }

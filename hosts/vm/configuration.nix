@@ -17,7 +17,7 @@
       resolution = { x = 1920; y = 1080; };
 
       # Carte graphique virtuelle avec accélération 3D (virgl) :
-      # nécessaire pour la plupart des compositeurs Wayland (Hyprland, niri…).
+      # nécessaire pour niri et l'écran de connexion ReGreet.
       qemu.options = [
         "-vga none"
         "-device virtio-vga-gl"
@@ -31,9 +31,6 @@
         target = "/mnt/rice";
       };
     };
-
-    # Curseur souvent invisible dans les VM avec les compositeurs wlroots.
-    environment.sessionVariables.WLR_NO_HARDWARE_CURSORS = "1";
   };
 
   # ─── Pour une vraie installation plus tard (virt-manager, portable…) ──────

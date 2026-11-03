@@ -1,5 +1,5 @@
 {
-  description = "Nouveau rice NixOS sous Wayland — banc d'essai en machine virtuelle";
+  description = "Nouveau rice NixOS sous Wayland (niri) — testé d'abord en machine virtuelle";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
@@ -8,15 +8,35 @@
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Thème global : une palette (tirée du fond d'écran) appliquée partout.
+    stylix = {
+      url = "github:nix-community/stylix/release-26.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Pour écrire la config de niri en Nix (vérifiée pendant le rebuild).
+    # On n'en prend que la partie « réglages » : niri lui-même vient de nixpkgs.
+    niri = {
+      url = "github:sodiboo/niri-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs-stable.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    { self, nixpkgs, home-manager, ... }:
+    {
+      self,
+      nixpkgs,
+      home-manager,
+      stylix,
+      niri,
+      ...
+    }:
     let
       system = "x86_64-linux";
 
       # Fabrique une machine à partir de son dossier hosts/<nom>.
-      # Pour ajouter une machine plus tard : hosts/<nom>/ + une ligne plus bas.
       mkHost =
         host:
         nixpkgs.lib.nixosSystem {
@@ -25,7 +45,9 @@
           modules = [
             ./hosts/${host}/configuration.nix
             ./modules/base.nix
-            ./modules/wayland.nix
+            ./modules/bureau.nix
+            ./modules/theme.nix
+            stylix.nixosModules.stylix
 
             home-manager.nixosModules.home-manager
             {
@@ -33,6 +55,10 @@
               home-manager.useUserPackages = true;
               home-manager.backupFileExtension = "avant-hm";
               home-manager.extraSpecialArgs = { inherit host; };
+              home-manager.sharedModules = [
+                niri.homeModules.config # option programs.niri.settings
+                niri.homeModules.stylix # couleurs Stylix appliquées à niri
+              ];
               home-manager.users.asap = import ./home/asap.nix;
             }
           ];
