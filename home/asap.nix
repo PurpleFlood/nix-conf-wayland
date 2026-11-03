@@ -11,7 +11,10 @@
     ./bureau/veille.nix # swayidle (+ gtklock côté système)
     ./bureau/services.nix # fond d'écran, presse-papiers, OSD, lumière bleue, polkit, USB
     ./terminal.nix # Ghostty + Nushell + starship, zoxide, carapace
-    ./applis.nix # yazi, images, PDF, vidéo, son, Bluetooth…
+    ./neovim.nix # Neovim + AstroNvim (config dans dotfiles/nvim)
+    ./applis.nix # applis communes
+    ./navigateurs/firefox.nix # réglages communs : navigateurs/navigateur-commun.nix
+    ./navigateurs/zen.nix
   ];
 
   home.username = "asap";

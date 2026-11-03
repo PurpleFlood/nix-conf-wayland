@@ -1,9 +1,9 @@
-# APPLIS du quotidien et outils en terminal.
-{ pkgs, ... }:
+# APPLIS communes à toutes les machines.
+{ pkgs, pkgs-unstable, ... }:
 
 {
-  # Fichiers (Thunar est installé côté système).
-  programs.yazi.enable = true;
+  # ─── Outils du rice ────────────────────────────────────────────────────
+  programs.yazi.enable = true; # fichiers en terminal (Thunar côté système)
 
   # Annotation des captures : copie directe dans le presse-papiers.
   programs.satty = {
@@ -17,10 +17,17 @@
 
   programs.zathura.enable = true; # PDF
   programs.mpv.enable = true; # vidéo
-  programs.neovim.enable = true; # éditeur (AstroNvim viendra plus tard)
+  programs.obs-studio.enable = true; # enregistrement / streaming
+
+  # GitHub en ligne de commande + identifiants pour git push.
+  # Une seule fois par machine : `gh auth login`.
+  programs.gh = {
+    enable = true;
+    gitCredentialHelper.enable = true;
+  };
 
   home.packages = with pkgs; [
-    firefox # navigateur (en attendant de reprendre ta config Zen)
+    # ─── Bureau Wayland ──────────────────────────────────────────────────
     imv # images
     vlc
     wiremix # mixeur PipeWire en terminal
@@ -30,7 +37,63 @@
     grim # capture d'une zone…
     slurp # …sélectionnée à la souris
     wl-clipboard # wl-copy / wl-paste
+    libnotify # notify-send
+
+    # ─── Terminal / CLI ──────────────────────────────────────────────────
+    bat
+    eza
+    fzf
     btop
+    htop
     fastfetch
+    glow
+    jq
+    _7zz
+    xz
+    zstd
+    unzip
+    newsboat
+    yt-dlp
+    ansible
+    pkgs-unstable.ani-cli # suit les changements des sites
+    sshfs
+    openssl
+
+    # Twitch
+    wtwitch
+    twitch-tui
+    twitch-dl
+    streamlink
+    ffmpeg
+
+    # ─── Applis ──────────────────────────────────────────────────────────
+    file-roller
+    keepassxc
+    qbittorrent
+    pidgin
+    mumble
+    discord
+    spotify
+    spotify-player
+    obsidian
+    blender
+    krita
+    libreoffice
+    nextcloud-client
+    filezilla
+
+    # ─── Dev ─────────────────────────────────────────────────────────────
+    # (gcc et nodejs sont dans home/neovim.nix)
+    cmake
+    gnumake
+    pkg-config
+    rustc
+    cargo
+    jdk21
+    dotnet-sdk
+    ghidra
+    podman-compose
+    claude-code
+    opencode
   ];
 }

@@ -4,7 +4,10 @@
 {
   # ─── Nix ───────────────────────────────────────────────────────────────
   nix.settings = {
-    experimental-features = [ "nix-command" "flakes" ];
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
     auto-optimise-store = true;
   };
   nixpkgs.config.allowUnfree = true;
@@ -20,7 +23,13 @@
   users.users.asap = {
     isNormalUser = true;
     description = "asap";
-    extraGroups = [ "wheel" "video" "audio" "networkmanager" "input" ];
+    extraGroups = [
+      "wheel"
+      "video"
+      "audio"
+      "networkmanager"
+      "input"
+    ];
     initialPassword = "nixos"; # à changer avec `passwd` sur une vraie machine
   };
 
@@ -52,4 +61,8 @@
     curl
     unzip
   ];
+
+  # Permet aux programmes précompilés pour d'autres Linux de tourner
+  # (outils téléchargés par Mason dans Neovim, binaires de jeux, etc.).
+  programs.nix-ld.enable = true;
 }

@@ -1,9 +1,16 @@
 # WAYBAR : la barre. Lancée automatiquement avec la session (systemd).
 # Couleurs : Stylix. Les clics ouvrent les outils en terminal (Ghostty).
-{ ... }:
+{ lib, pkgs, ... }:
 
 let
   tui = cmd: "ghostty -e ${cmd}"; # ouvre un outil en terminal
+
+  # État du VPN Mullvad (bouton masqué si aucun pays n'est configuré).
+  vpnEtat = pkgs.writeShellScriptBin "vpn-etat" ''
+    export PATH=${lib.makeBinPath (with pkgs; [ curl jq iproute2 gawk coreutils ])}:/run/wrappers/bin:$PATH
+    ${builtins.readFile ./scripts/vpn-etat.sh}
+  '';
+
 in
 {
   programs.waybar = {
@@ -30,6 +37,8 @@ in
         "battery"
         "custom/extinction"
       ];
+
+
 
       "niri/window".max-length = 50;
 
@@ -59,6 +68,14 @@ in
         format-disconnected = "󰖪";
         tooltip-format = "{ipaddr} — {signalStrength}%";
         on-click = tui "nmtui";
+      };
+
+      "custom/vpn" = {
+        exec = "${vpnEtat}/bin/vpn-etat";
+        return-type = "json";
+        interval = 15;
+        signal = 8; # rafraîchi tout de suite par vpn-menu
+        on-click = "vpn-menu";
       };
 
       power-profiles-daemon = {
@@ -100,15 +117,15 @@ in
 	  padding: 0 10px 0 6px;
 	}
 	      /* Boutons : coins arrondis et transition douce */
-        #workspaces button, #clock, #wireplumber, #bluetooth, #network,
-        #power-profiles-daemon, #battery, #custom-extinction {
+        #workspaces button, #clock, #wireplumber, #bluetooth, #network
+        #power-profiles-daemon, #battery, #custom-extinction, #custom-vpn.actif {
           border-radius: 8px;
           transition: background-color 0.2s ease, color 0.2s ease;
         }
         /* Survol : léger fond aux couleurs de la palette */
         #workspaces button:hover, #clock:hover, #wireplumber:hover,
         #bluetooth:hover, #network:hover, #power-profiles-daemon:hover,
-        #battery:hover {
+        #battery:hover, #custom-vpn.actif:hover {
           background-color: alpha(@base0E, 0.25);
         }
         /* Le bouton d'extinction vire au rouge au survol */

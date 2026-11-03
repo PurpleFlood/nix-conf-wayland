@@ -31,6 +31,18 @@ in
       cliphist list | ${menu} | cliphist decode | wl-copy
     '')
 
+        # Clic sur le bouton VPN de la barre : choisir un pays ou se déconnecter.
+    (pkgs.writeShellScriptBin "vpn-menu" ''
+      export PATH=/run/wrappers/bin:/run/current-system/sw/bin:$PATH
+      choix=$( { sudo -n vpn list; echo "Déconnecter"; } | ${menu})
+      [ -z "$choix" ] && exit 0
+      [ "$choix" = "Déconnecter" ] && cible=off || cible="$choix"
+      notify-send "VPN" "$( [ "$cible" = off ] && echo "Déconnexion…" || echo "Connexion : $cible…" )"
+      notify-send "VPN" "$(sudo -n vpn "$cible" 2>&1 | tail -n 1)"
+      # Met à jour le bouton de la barre tout de suite.
+      systemctl --user kill --signal=SIGRTMIN+8 waybar.service
+    '')
+
     # Mod+Shift+Échap ou bouton ⏻ de la barre : menu d'extinction.
     (pkgs.writeShellScriptBin "menu-extinction" ''
       choix=$(printf '%s\n' \

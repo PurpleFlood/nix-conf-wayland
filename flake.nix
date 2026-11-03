@@ -3,6 +3,9 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    # Version la plus récente, pour quelques paquets qui doivent être très à jour
+    # (SearXNG, ani-cli…). Utilisable partout sous le nom `pkgs-unstable`.
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
@@ -13,6 +16,13 @@
     stylix = {
       url = "github:nix-community/stylix/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Navigateur Zen (pas dans nixpkgs).
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.home-manager.follows = "home-manager";
     };
 
     # Pour écrire la config de niri en Nix (vérifiée pendant le rebuild).
@@ -28,25 +38,37 @@
     {
       self,
       nixpkgs,
+      nixpkgs-unstable,
       home-manager,
       stylix,
       niri,
+      zen-browser,
       ...
     }:
     let
       system = "x86_64-linux";
+
+      pkgs-unstable = import nixpkgs-unstable {
+        inherit system;
+        config.allowUnfree = true;
+      };
 
       # Fabrique une machine à partir de son dossier hosts/<nom>.
       mkHost =
         host:
         nixpkgs.lib.nixosSystem {
           inherit system;
-          specialArgs = { inherit host; };
+          specialArgs = { inherit host pkgs-unstable; };
           modules = [
             ./hosts/${host}/configuration.nix
             ./modules/base.nix
             ./modules/bureau.nix
             ./modules/theme.nix
+            ./modules/reseau.nix # DNS local + certificat Caddy
+            ./modules/vpn.nix # commande `vpn` (Mullvad / WireGuard)
+            ./modules/searxng.nix # moteur de recherche local
+            ./modules/musique.nix # Reaper, plugins, audio basse latence
+            ./modules/outils.nix # podman, virt-manager, Flatpak, AppImage
             stylix.nixosModules.stylix
 
             home-manager.nixosModules.home-manager
@@ -54,10 +76,11 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.backupFileExtension = "avant-hm";
-              home-manager.extraSpecialArgs = { inherit host; };
+              home-manager.extraSpecialArgs = { inherit host pkgs-unstable; };
               home-manager.sharedModules = [
                 niri.homeModules.config # option programs.niri.settings
                 niri.homeModules.stylix # couleurs Stylix appliquées à niri
+                zen-browser.homeModules.beta # option programs.zen-browser
               ];
               home-manager.users.asap = import ./home/asap.nix;
             }
