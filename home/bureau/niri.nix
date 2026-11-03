@@ -92,13 +92,15 @@ in
     # Fond d'écran posé au démarrage (le démon awww est lancé par systemd).
     spawn-at-startup = [
       { sh = "sleep 1 && awww img ${wallpaper}"; }
+      # Ghostty reste chargé en arrière-plan : les fenêtres s'ouvrent instantanément.
+      { command = [ "systemctl" "--user" "start" "app-com.mitchellh.ghostty.service" ]; }
     ];
 
     hotkey-overlay.skip-at-startup = true;
 
     binds = raccourcisBureaux // {
       # ── Applis ─────────────────────────────────────────────────────
-      "Mod+Return".action.spawn = "ghostty";
+      "Mod+Return".action.spawn = [ "ghostty" "+new-window" ];
       "Mod+D".action.spawn = "anyrun";
       "Mod+E".action.spawn = [ "ghostty" "-e" "yazi" ];
       "Mod+Shift+E".action.spawn = "thunar";
@@ -106,6 +108,7 @@ in
       "Mod+Shift+Escape".action.spawn = "menu-extinction";
       "Mod+Alt+L".action.spawn = "gtklock";
       "Mod+Shift+Slash".action.show-hotkey-overlay = [ ]; # aide des raccourcis
+      "Mod+B".action.spawn = [ "systemctl" "--user" "kill" "--signal=SIGUSR1" "waybar.service" ]; # masquer / afficher la barre 
 
       # ── Fenêtres ───────────────────────────────────────────────────
       "Mod+Q".action.close-window = [ ];
@@ -128,6 +131,12 @@ in
       "Mod+Ctrl+Right".action.move-column-right = [ ];
       "Mod+Ctrl+Up".action.move-window-up = [ ];
       "Mod+Ctrl+Down".action.move-window-down = [ ];
+
+      # Même chose en version vim (h j k l)
+      "Mod+Ctrl+H".action.move-column-left = [ ];
+      "Mod+Ctrl+L".action.move-column-right = [ ];
+      "Mod+Ctrl+K".action.move-window-up = [ ];
+      "Mod+Ctrl+J".action.move-window-down = [ ];
 
       # Empiler / dépiler une fenêtre dans la colonne voisine.
       "Mod+Comma".action.consume-window-into-column = [ ];

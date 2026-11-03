@@ -11,6 +11,7 @@
       window-padding-x = 10;
       window-padding-y = 10;
       confirm-close-surface = false;
+      quit-after-last-window-closed = false;
     };
   };
 

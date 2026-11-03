@@ -48,4 +48,17 @@ in
       esac
     '')
   ];
+    # anyrun reste chargé en arrière-plan : il s'ouvre instantanément.
+  systemd.user.services.anyrun = {
+    Unit = {
+      Description = "anyrun en mode démon";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.anyrun}/bin/anyrun daemon";
+      Restart = "on-failure";
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
 }

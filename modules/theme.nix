@@ -8,7 +8,7 @@
 {
   stylix = {
     enable = true;
-    image = ../wallpapers/fond.jpg;
+    image = ../wallpapers/wallpaper.jpg;
     polarity = "dark"; # palette sombre
 
     cursor = {
@@ -34,6 +34,10 @@
         package = pkgs.noto-fonts-color-emoji;
         name = "Noto Color Emoji";
       };
+    };
+  opacity = {
+    terminal = 0.85;
+    desktop = 0.85;
     };
   };
 }
