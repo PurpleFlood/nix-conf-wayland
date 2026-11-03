@@ -1,9 +1,43 @@
 # BUREAU (côté système) : niri, écran de connexion, verrouillage, fichiers.
 # Tout ce qui demande les droits root ou un service système.
-{ config, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  host,
+  ...
+}:
 
 let
   c = config.lib.stylix.colors.withHashtag; # palette Stylix (#rrggbb)
+
+  # ── Écran de connexion : ReGreet lancé dans un mini-niri ──────────────
+  # (au lieu de cage, qui étale la fenêtre sur tous les écrans et ignore
+  # la disposition du clavier).
+  clavier = if host == "t470" then "us" else "fr";
+
+  # Écrans éteints pendant la connexion : ReGreet n'apparaît que sur l'écran
+  # principal. La session niri rallume ensuite tous les écrans.
+  ecransEteints = { pc = [ "DP-1" ]; }.${host} or [ ];
+
+  niriConnexion = pkgs.writeText "niri-connexion.kdl" ''
+    input {
+        keyboard {
+            xkb {
+                layout "${clavier}"
+            }
+        }
+    }
+    ${lib.concatMapStrings (ecran: ''
+      output "${ecran}" {
+          off
+      }
+    '') ecransEteints}
+    hotkey-overlay {
+        skip-at-startup
+    }
+    spawn-sh-at-startup "${lib.getExe config.programs.regreet.package}; ${lib.getExe pkgs.niri} msg action quit --skip-confirmation"
+  '';
 in
 {
   # ─── Compositeur ───────────────────────────────────────────────────────
@@ -15,6 +49,9 @@ in
   # ─── Écran de connexion : greetd + ReGreet ─────────────────────────────
   # Au démarrage : choix de l'utilisateur et de la session, puis lance niri.
   # Couleurs, police, curseur et fond : appliqués par Stylix.
+  services.greetd.settings.default_session.command =
+    "${pkgs.dbus}/bin/dbus-run-session ${lib.getExe pkgs.niri} -c ${niriConnexion}";
+
   programs.regreet = {
     enable = true;
     iconTheme = {

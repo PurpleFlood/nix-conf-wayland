@@ -120,6 +120,11 @@ in
     autoStart = true;
     highPriority = true;
     steam.importOXRRuntimes = true;
+    # Couche OpenVR → OpenXR que WiVRn active à la connexion du casque
+    config = {
+      enable = true;
+      json.openvr-compat-path = "${pkgs.xrizer}/lib/xrizer";
+    };
   };
 
   # ─── IA locale : Ollama (Vulkan, pas de compilation CUDA) ──────────────

@@ -1,9 +1,5 @@
-# État du VPN pour waybar (JSON). N'affiche rien si la commande `vpn`
-# ou les fichiers WireGuard (/etc/wireguard/<pays>/) sont absents.
-
-[ -x /run/current-system/sw/bin/vpn ] || exit 0
-pays_dispo=$(sudo -n /run/current-system/sw/bin/vpn list 2>/dev/null)
-[ -z "$pays_dispo" ] && exit 0
+# État du VPN pour waybar (JSON). L'icône est toujours affichée :
+# pleine couleur si une interface WireGuard est active, grisée sinon.
 
 # Interface WireGuard active (pas besoin de root avec ip)
 serveur=$(ip -o link show type wireguard 2>/dev/null | awk -F': ' '{print $2; exit}')

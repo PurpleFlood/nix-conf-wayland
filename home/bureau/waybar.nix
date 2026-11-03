@@ -7,7 +7,18 @@ let
 
   # État du VPN Mullvad (bouton masqué si aucun pays n'est configuré).
   vpnEtat = pkgs.writeShellScriptBin "vpn-etat" ''
-    export PATH=${lib.makeBinPath (with pkgs; [ curl jq iproute2 gawk coreutils ])}:/run/wrappers/bin:$PATH
+    export PATH=${
+      lib.makeBinPath (
+        with pkgs;
+        [
+          curl
+          jq
+          iproute2
+          gawk
+          coreutils
+        ]
+      )
+    }:/run/wrappers/bin:$PATH
     ${builtins.readFile ./scripts/vpn-etat.sh}
   '';
 
@@ -26,19 +37,24 @@ in
       margin-right = 12;
       spacing = 8;
 
-      modules-left = [ "niri/workspaces" "niri/window" ];
+      modules-left = [
+        "niri/workspaces"
+        "niri/window"
+      ];
       modules-center = [ "clock" ];
       modules-right = [
         "tray"
         "wireplumber"
         "bluetooth"
         "network"
+        "custom/vpn"
         "power-profiles-daemon"
         "battery"
         "custom/extinction"
       ];
 
-
+      # Numéro du bureau sur son écran (1, 2, 3…) plutôt que son nom (6, 7, 8)
+      "niri/workspaces".format = "{index}";
 
       "niri/window".max-length = 50;
 
@@ -51,7 +67,11 @@ in
       wireplumber = {
         format = "{icon} {volume}%";
         format-muted = "󰝟";
-        format-icons = [ "󰕿" "󰖀" "󰕾" ];
+        format-icons = [
+          "󰕿"
+          "󰖀"
+          "󰕾"
+        ];
         on-click = tui "wiremix";
       };
 
@@ -90,7 +110,14 @@ in
       battery = {
         format = "{icon} {capacity}%";
         format-charging = "󰂄 {capacity}%";
-        format-icons = [ "󰂎" "󰁻" "󰁽" "󰁿" "󰂁" "󰁹" ];
+        format-icons = [
+          "󰂎"
+          "󰁻"
+          "󰁽"
+          "󰁿"
+          "󰂁"
+          "󰁹"
+        ];
         states = {
           warning = 25;
           critical = 10;
@@ -104,35 +131,35 @@ in
       };
     };
     style = ''
-    	window#waybar {
-	  border-radius: 12px;
-	}
-	tooltip {
-	  border-radius: 10px;
-	}
-	.modules-right {
-	  margin-right: 16px;
-	}
-	#custom-extinction {
-	  padding: 0 10px 0 6px;
-	}
-	      /* Boutons : coins arrondis et transition douce */
-        #workspaces button, #clock, #wireplumber, #bluetooth, #network
-        #power-profiles-daemon, #battery, #custom-extinction, #custom-vpn.actif {
-          border-radius: 8px;
-          transition: background-color 0.2s ease, color 0.2s ease;
-        }
-        /* Survol : léger fond aux couleurs de la palette */
-        #workspaces button:hover, #clock:hover, #wireplumber:hover,
-        #bluetooth:hover, #network:hover, #power-profiles-daemon:hover,
-        #battery:hover, #custom-vpn.actif:hover {
-          background-color: alpha(@base0E, 0.25);
-        }
-        /* Le bouton d'extinction vire au rouge au survol */
-        #custom-extinction:hover {
-          background-color: alpha(@base08, 0.25);
-          color: @base08;
-        }
-	'';
+          	window#waybar {
+      	  border-radius: 12px;
+      	}
+      	tooltip {
+      	  border-radius: 10px;
+      	}
+      	.modules-right {
+      	  margin-right: 16px;
+      	}
+      	#custom-extinction {
+      	  padding: 0 10px 0 6px;
+      	}
+      	      /* Boutons : coins arrondis et transition douce */
+              #workspaces button, #clock, #wireplumber, #bluetooth, #network,
+              #power-profiles-daemon, #battery, #custom-extinction, #custom-vpn.actif {
+                border-radius: 8px;
+                transition: background-color 0.2s ease, color 0.2s ease;
+              }
+              /* Survol : léger fond aux couleurs de la palette */
+              #workspaces button:hover, #clock:hover, #wireplumber:hover,
+              #bluetooth:hover, #network:hover, #power-profiles-daemon:hover,
+              #battery:hover, #custom-vpn.actif:hover {
+                background-color: alpha(@base0E, 0.25);
+              }
+              /* Le bouton d'extinction vire au rouge au survol */
+              #custom-extinction:hover {
+                background-color: alpha(@base08, 0.25);
+                color: @base08;
+              }
+      	'';
   };
 }
