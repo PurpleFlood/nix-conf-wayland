@@ -10,18 +10,37 @@
 
   # ─── Réglages de la VM (appliqués seulement par `nix run .#vm`) ───────────
   virtualisation.vmVariant = {
+    systemd.services.greetd.environment.WLR_RENDERER = "pixman";
+    # Accès SSH depuis ton PC : ssh -p 2222 asap@localhost
+    services.openssh.enable = true;
+    virtualisation.forwardPorts = [
+      {
+        from = "host";
+        host.port = 2222;
+        guest.port = 22;
+      }
+    ];
+    # Dans la VM : pas d'écran de connexion, niri démarre directement.
+    programs.regreet.enable = lib.mkForce false;
+    services.greetd.settings.default_session = {
+      command = "niri-session";
+      user = "asap";
+    };
     virtualisation = {
       memorySize = 8192; # Mo de RAM
       cores = 4;
       diskSize = 20480; # Mo de disque
-      resolution = { x = 1920; y = 1080; };
+      resolution = {
+        x = 1920;
+        y = 1080;
+      };
 
       # Carte graphique virtuelle avec accélération 3D (virgl) :
       # nécessaire pour niri et l'écran de connexion ReGreet.
       qemu.options = [
         "-vga none"
-        "-device virtio-vga-gl"
-        "-display gtk,gl=on,zoom-to-fit=off"
+        "-device virtio-vga"
+        "-display sdl"
       ];
 
       # Le dossier depuis lequel tu lances la VM (ton dépôt) est visible
