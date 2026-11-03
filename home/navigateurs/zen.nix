@@ -1,10 +1,18 @@
 # ZEN : mêmes extensions, moteurs et réglages que Firefox (navigateur-commun.nix),
 # plus quelques réglages propres à Zen. Se lance avec `zen-beta`.
 # Nécessite le module zen-browser.homeModules.beta (branché dans flake.nix).
-{ ... }:
+{ config, ... }:
 
 let
   commun = import ./navigateur-commun.nix;
+
+  favoris = {
+    "browser.bookmarks.file" =
+      "${config.home.homeDirectory}/git/nix-conf-wayland/dotfiles/favoris.html";
+    "browser.bookmarks.autoExportHTML" = true; # fermeture → écrit le fichier
+    "browser.places.importBookmarksHTML" = true; # démarrage → relit le fichier
+  };
+
 in
 {
   programs.zen-browser = {
@@ -17,7 +25,7 @@ in
     profiles.asap = {
       id = 0;
       isDefault = true;
-      search = commun.search;
+      search = commun.search // favoris;
       settings = commun.settings // {
         "zen.welcome-screen.seen" = true; # saute l'écran d'accueil
         "ui.systemUsesDarkTheme" = 1; # interface en sombre
