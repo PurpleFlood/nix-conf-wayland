@@ -8,7 +8,7 @@
 {
   stylix = {
     enable = true;
-    image = ../wallpapers/wallpaper.jpg;
+    image = ../wallpapers/wallhaven-r7gzzm.jpg;
     polarity = "dark"; # palette sombre
 
     cursor = {
@@ -35,9 +35,9 @@
         name = "Noto Color Emoji";
       };
     };
-  opacity = {
-    terminal = 0.85;
-    desktop = 0.85;
+    opacity = {
+      terminal = 0.85;
+      desktop = 0.85;
     };
   };
 }
