@@ -20,6 +20,7 @@
   programs.neovim.enable = true; # éditeur (AstroNvim viendra plus tard)
 
   home.packages = with pkgs; [
+    firefox # navigateur (en attendant de reprendre ta config Zen)
     imv # images
     vlc
     wiremix # mixeur PipeWire en terminal

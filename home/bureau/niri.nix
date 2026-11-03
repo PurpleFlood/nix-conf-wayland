@@ -5,11 +5,43 @@
 # Logique des raccourcis : Mod = touche Super (Windows).
 #   Mod + flèches / h j k l       se déplacer
 #   Mod + Ctrl + flèches          déplacer la fenêtre
-#   Mod + & é " ' ( …             aller au bureau 1, 2, 3…
-{ config, pkgs, ... }:
+#   Mod + 1 à 5                   aller au bureau 1 à 5 (& é " ' ( en AZERTY)
+{
+  config,
+  lib,
+  pkgs,
+  host,
+  ...
+}:
 
 let
   wallpaper = config.stylix.image;
+
+  # Disposition du clavier selon la machine : le T470 est en QWERTY.
+  clavier = if host == "t470" then "us" else "fr";
+
+  # Touches de la rangée des chiffres pour les bureaux 1 à 5.
+  touchesBureaux =
+    if clavier == "fr" then
+      [ "ampersand" "eacute" "quotedbl" "apostrophe" "parenleft" ]
+    else
+      [ "1" "2" "3" "4" "5" ];
+
+  # Génère « Mod+touche → bureau n » et « Mod+Shift+touche → envoyer sur n ».
+  raccourcisBureaux = lib.listToAttrs (
+    lib.concatLists (
+      lib.imap1 (n: touche: [
+        {
+          name = "Mod+${touche}";
+          value.action.focus-workspace = n;
+        }
+        {
+          name = "Mod+Shift+${touche}";
+          value.action.move-column-to-workspace = n;
+        }
+      ]) touchesBureaux
+    )
+  );
 in
 {
   # niri vient de nixpkgs (le même que le module système).
@@ -17,7 +49,7 @@ in
 
   programs.niri.settings = {
     input = {
-      keyboard.xkb.layout = "fr";
+      keyboard.xkb.layout = clavier;
       touchpad = {
         tap = true; # toucher = clic
         natural-scroll = true;
@@ -64,7 +96,7 @@ in
 
     hotkey-overlay.skip-at-startup = true;
 
-    binds = {
+    binds = raccourcisBureaux // {
       # ── Applis ─────────────────────────────────────────────────────
       "Mod+Return".action.spawn = "ghostty";
       "Mod+D".action.spawn = "anyrun";
@@ -101,17 +133,7 @@ in
       "Mod+Comma".action.consume-window-into-column = [ ];
       "Mod+Period".action.expel-window-from-column = [ ];
 
-      # ── Bureaux (rangée AZERTY) ────────────────────────────────────
-      "Mod+ampersand".action.focus-workspace = 1;
-      "Mod+eacute".action.focus-workspace = 2;
-      "Mod+quotedbl".action.focus-workspace = 3;
-      "Mod+apostrophe".action.focus-workspace = 4;
-      "Mod+parenleft".action.focus-workspace = 5;
-      "Mod+Shift+ampersand".action.move-column-to-workspace = 1;
-      "Mod+Shift+eacute".action.move-column-to-workspace = 2;
-      "Mod+Shift+quotedbl".action.move-column-to-workspace = 3;
-      "Mod+Shift+apostrophe".action.move-column-to-workspace = 4;
-      "Mod+Shift+parenleft".action.move-column-to-workspace = 5;
+      # ── Bureaux (Mod + 1 à 5 : générés plus haut selon le clavier) ──
       "Mod+Page_Down".action.focus-workspace-down = [ ];
       "Mod+Page_Up".action.focus-workspace-up = [ ];
 

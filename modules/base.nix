@@ -1,5 +1,5 @@
 # SOCLE commun à toutes les machines : Nix, langue, utilisateur, réseau, son, matériel.
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 {
   # ─── Nix ───────────────────────────────────────────────────────────────
@@ -12,7 +12,7 @@
   # ─── Langue, heure, clavier ────────────────────────────────────────────
   time.timeZone = "Europe/Paris";
   i18n.defaultLocale = "fr_FR.UTF-8";
-  console.keyMap = "fr";
+  console.keyMap = lib.mkDefault "fr"; # le T470 passe en "us" (hosts/t470)
 
   # ─── Utilisateur ───────────────────────────────────────────────────────
   # bash reste le shell de connexion (il prépare la session) ;
