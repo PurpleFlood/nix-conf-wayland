@@ -1,6 +1,18 @@
 # APPLIS communes à toutes les machines.
 { pkgs, pkgs-unstable, ... }:
 
+# Mumble forcé en mode X11 (XWayland) : le push-to-talk fonctionne quand
+# la fenêtre active est une appli X11, donc dans les jeux Steam/Proton.
+let
+  mumble = pkgs.symlinkJoin {
+    name = "mumble";
+    paths = [ pkgs.mumble ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = "wrapProgram $out/bin/mumble --set QT_QPA_PLATFORM xcb";
+  };
+
+in
+
 {
   # ─── Outils du rice ────────────────────────────────────────────────────
   programs.yazi.enable = true; # fichiers en terminal (Thunar côté système)
