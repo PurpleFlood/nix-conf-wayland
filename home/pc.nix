@@ -12,6 +12,12 @@ let
   # Fichiers de config modifiables, rangés dans le dépôt (dotfiles/pc/).
   dots = "${config.home.homeDirectory}/git/nix-conf-wayland/dotfiles/pc";
   lien = chemin: config.lib.file.mkOutOfStoreSymlink "${dots}/${chemin}";
+
+  # Heretic via uv : le PyTorch de PyPI embarque CUDA (celui de nixpkgs est CPU)
+  heretic = pkgs.writeShellScriptBin "heretic" ''
+    export LD_LIBRARY_PATH=/run/opengl-driver/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+    exec ${pkgs.uv}/bin/uvx --python 3.12 --from heretic-llm heretic "$@"
+  '';
 in
 {
   # ─── Écrans ────────────────────────────────────────────────────────────
@@ -101,6 +107,8 @@ in
     protonplus
     protonup-rs
     davinci-resolve # montage vidéo (a besoin de la carte NVIDIA)
+    heretic
+    bs-manager
   ];
 
   programs.obs-studio.plugins = [ pkgs.obs-studio-plugins.obs-vkcapture ];

@@ -65,6 +65,7 @@
             ./modules/bureau.nix
             ./modules/theme.nix
             ./modules/reseau.nix # DNS local + certificat Caddy
+            ./modules/i2p.nix # module I2p
             ./modules/vpn.nix # commande `vpn` (Mullvad / WireGuard)
             ./modules/searxng.nix # moteur de recherche local
             ./modules/musique.nix # Reaper, plugins, audio basse latence
