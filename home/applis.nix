@@ -71,6 +71,9 @@ in
     sshfs
     openssl
 
+    # --- compatibilité
+    bottles
+
     # Twitch
     wtwitch
     twitch-tui
@@ -107,8 +110,5 @@ in
     podman-compose
     claude-code
     opencode
-
-    # --- Musique
-    mixxx
   ];
 }

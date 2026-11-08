@@ -43,5 +43,17 @@
     };
   };
 
+  # Raccourci pour Cardinal autonome (le paquet n'en fournit pas)
+  xdg.desktopEntries.cardinal = {
+    name = "Cardinal";
+    comment = "Rack modulaire (VCV Rack libre)";
+    exec = "Cardinal";
+    icon = "audio-x-generic";
+    categories = [
+      "Audio"
+      "AudioVideo"
+    ];
+  };
+
   home.stateVersion = "26.05";
 }

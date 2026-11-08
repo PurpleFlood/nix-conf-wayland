@@ -68,7 +68,7 @@ in
     airwin2rack # Airwindows Consolidated : ~500 effets dans un seul plugin
     lsp-plugins # EQ, compresseurs, limiteurs… de qualité studio
     qpwgraph # brancher les entrées / sorties audio à la souris
-
+    mixxx # logiciel de mix djing, radio opensource
     # Plugins Windows dans Reaper (Kilohearts Essentials…) via yabridge
     yabridge
     yabridgectl

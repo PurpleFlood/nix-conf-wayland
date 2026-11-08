@@ -99,13 +99,6 @@ in
       ];
     };
 
-  # ─── Disque dur interne (données) ──────────────────────────────────────
-  fileSystems."/mnt/data" = {
-    device = "/dev/sda";
-    fsType = "ext4";
-    options = [ "nofail" ];
-  };
-
   # ─── Jeux ──────────────────────────────────────────────────────────────
   programs.steam = {
     enable = true;
