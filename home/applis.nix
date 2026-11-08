@@ -1,5 +1,10 @@
 # APPLIS communes à toutes les machines.
-{ pkgs, pkgs-unstable, ... }:
+{
+  lib,
+  pkgs,
+  pkgs-unstable,
+  ...
+}:
 
 # Mumble forcé en mode X11 (XWayland) : le push-to-talk fonctionne quand
 # la fenêtre active est une appli X11, donc dans les jeux Steam/Proton.
@@ -10,6 +15,26 @@ let
     nativeBuildInputs = [ pkgs.makeWrapper ];
     postBuild = "wrapProgram $out/bin/mumble --set QT_QPA_PLATFORM xcb";
   };
+
+  # Bitwig 4.4 extrait dans ~/bitwig-studio-4.4, lancé dans un environnement
+  # Linux classique (steam-run) avec les bibliothèques qui lui manquent.
+  bitwig = pkgs.writeShellScriptBin "bitwig" ''
+    export LD_LIBRARY_PATH=${
+      lib.makeLibraryPath (
+        with pkgs;
+        [
+          libxcb-wm
+          libxcb-util
+          libbsd
+          xorg.libxkbfile
+          xorg.libXtst
+          xorg.libXcursor
+          libxkbcommon
+        ]
+      )
+    }:${pkgs.pipewire.jack}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+    exec ${pkgs.steam-run}/bin/steam-run "$HOME/Soft/bitwig-studio/bitwig-studio" "$@"
+  '';
 
 in
 
@@ -110,5 +135,16 @@ in
     podman-compose
     claude-code
     opencode
+    bitwig
   ];
+
+  xdg.desktopEntries.bitwig = {
+    name = "Bitwig Studio";
+    exec = "bitwig";
+    icon = "audio-x-generic";
+    categories = [
+      "Audio"
+      "AudioVideo"
+    ];
+  };
 }
