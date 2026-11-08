@@ -60,6 +60,9 @@ in
     options rtw89_usb_git switch_usb_mode=y
   '';
 
+  # NTSYNC : synchronisation façon Windows pour Proton (moins de saccades)
+  boot.kernelModules = [ "ntsync" ];
+
   # ─── NVIDIA RTX 3050 ───────────────────────────────────────────────────
   hardware.graphics.enable32Bit = true; # jeux 32 bits / Steam / Wine
   services.xserver.videoDrivers = [ "nvidia" ]; # charge le pilote (aussi sous Wayland)
@@ -157,6 +160,28 @@ in
     dates = "weekly";
     options = "--delete-older-than 14d";
   };
+
+  # AnythingLLM (interface web sur http://localhost:3001), en conteneur podman
+  virtualisation.oci-containers = {
+    backend = "podman";
+    containers.anythingllm = {
+      image = "docker.io/mintplexlabs/anythingllm:latest";
+      volumes = [
+        "/var/lib/anythingllm:/app/server/storage"
+        "/var/lib/anythingllm/.env:/app/server/.env" # réglages du serveur
+      ];
+      environment.STORAGE_DIR = "/app/server/storage";
+      extraOptions = [
+        "--network=host" # joint LM Studio (1234) et Ollama (11434) en localhost
+        "--cap-add=SYS_ADMIN" # requis par le navigateur intégré (lecture de pages web)
+      ];
+    };
+  };
+  # Dossier des données + fichier .env vide, propriété de l'utilisateur de l'image
+  systemd.tmpfiles.rules = [
+    "d /var/lib/anythingllm 0755 1000 1000 -"
+    "f /var/lib/anythingllm/.env 0644 1000 1000 -"
+  ];
 
   # Version de la PREMIÈRE installation du PC : ne pas changer.
   system.stateVersion = "26.05";

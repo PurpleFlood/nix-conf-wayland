@@ -66,7 +66,7 @@ in
         name = "SearXNG";
         urls = [
           {
-            template = "http://localhost:8888/search";
+            template = "http://localhost:8889/search";
             params = [
               {
                 name = "q";

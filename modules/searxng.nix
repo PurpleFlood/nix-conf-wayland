@@ -12,8 +12,8 @@
     settings = {
       server = {
         bind_address = "127.0.0.1"; # accessible seulement depuis ce PC
-        port = 8888;
-        secret_key = "jesucetoutleszboubsdepaname"; 
+        port = 8889;
+        secret_key = "jesucetoutleszboubsdepaname";
         limiter = false; # inutile en usage perso
         image_proxy = true; # les images passent par SearXNG (vie privée)
         outgoing.source_ips = [ "0.0.0.0" ];

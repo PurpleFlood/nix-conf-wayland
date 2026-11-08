@@ -101,9 +101,12 @@ in
 
   # ─── Applis propres au PC ──────────────────────────────────────────────
   home.packages = with pkgs; [
+    lmstudio
     mangohud
-    prismlauncher
+    # + chargeur OpenXR, nécessaire à Vivecraft (xrizer → WiVRn)
+    (prismlauncher.override { additionalLibs = [ openxr-loader ]; })
     heroic
+    lutris
     protonplus
     protonup-rs
     davinci-resolve # montage vidéo (a besoin de la carte NVIDIA)

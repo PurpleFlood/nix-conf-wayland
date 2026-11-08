@@ -1,6 +1,11 @@
 # TON UTILISATEUR (home-manager) : applis, dotfiles et rice.
 # Chaque brique du rice a son fichier dans home/bureau/.
-{ lib, pkgs, host, ... }:
+{
+  lib,
+  pkgs,
+  host,
+  ...
+}:
 
 {
   imports = [

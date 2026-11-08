@@ -107,5 +107,8 @@ in
     podman-compose
     claude-code
     opencode
+
+    # --- Musique
+    mixxx
   ];
 }
