@@ -68,4 +68,11 @@
 
   # Autocomplétion des paquets installé dans le systeme pour fish
   programs.fish.enable = true;
+
+  # Swap compressée en RAM : beaucoup plus de marge avant de saturer
+  zramSwap.enable = true;
+  # Tue le programme le plus gourmand AVANT que tout le système gèle
+  services.earlyoom.enable = true;
+  # Autorise toutes les combinaisons Alt+SysRq (R E I S U B) en cas de gel
+  boot.kernel.sysctl."kernel.sysrq" = 1;
 }
