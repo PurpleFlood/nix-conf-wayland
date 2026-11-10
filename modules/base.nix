@@ -65,4 +65,7 @@
   # Permet aux programmes précompilés pour d'autres Linux de tourner
   # (outils téléchargés par Mason dans Neovim, binaires de jeux, etc.).
   programs.nix-ld.enable = true;
+
+  # Autocomplétion des paquets installé dans le systeme pour fish
+  programs.fish.enable = true;
 }

@@ -7,7 +7,7 @@
   programs.ghostty = {
     enable = true;
     settings = {
-      command = "${pkgs.nushell}/bin/nu";
+      command = "${pkgs.fish}/bin/fish";
       window-padding-x = 10;
       window-padding-y = 10;
       confirm-close-surface = false;
@@ -15,12 +15,12 @@
     };
   };
 
-  programs.nushell = {
+  programs.fish = {
     enable = true;
-    settings = {
-      show_banner = false;
-      edit_mode = "vi";
-    };
+    interactiveShellInit = ''
+      set fish_greeting          # pas de message d'accueil
+      fish_vi_key_bindings       # mode vi, comme ton réglage Nushell
+    '';
   };
 
   programs.starship.enable = true;
