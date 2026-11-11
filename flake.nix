@@ -57,6 +57,9 @@
       # Fabrique une machine à partir de son dossier hosts/<nom>.
       mkHost =
         host:
+        let
+          leger = host == "r400";
+        in
         nixpkgs.lib.nixosSystem {
           inherit system;
           specialArgs = { inherit host pkgs-unstable; };
@@ -66,11 +69,8 @@
             ./modules/bureau.nix
             ./modules/theme.nix
             ./modules/reseau.nix # DNS local + certificat Caddy
-            ./modules/i2p.nix # module I2p
             ./modules/vpn.nix # commande `vpn` (Mullvad / WireGuard)
-            ./modules/searxng.nix # moteur de recherche local
-            ./modules/musique.nix # Reaper, plugins, audio basse latence
-            ./modules/outils.nix # podman, virt-manager, Flatpak, AppImage
+            # podman, virt-manager, Flatpak, AppImage
             stylix.nixosModules.stylix
 
             home-manager.nixosModules.home-manager
@@ -86,6 +86,12 @@
               ];
               home-manager.users.asap = import ./home/asap.nix;
             }
+          ]
+          ++ nixpkgs.lib.optionals (!leger) [
+            ./modules/i2p.nix # module I2p
+            ./modules/searxng.nix # moteur de recherche local
+            ./modules/musique.nix # Reaper, plugins, audio basse latence
+            ./modules/outils.nix
           ];
         };
     in
@@ -93,6 +99,7 @@
       nixosConfigurations.vm = mkHost "vm";
       nixosConfigurations.t470 = mkHost "t470";
       nixosConfigurations.pc = mkHost "pc";
+      nixosConfigurations.r400 = mkHost "r400";
 
       # `nix run .#vm` : construit et lance la machine virtuelle, sans installation.
       apps.${system}.vm = {

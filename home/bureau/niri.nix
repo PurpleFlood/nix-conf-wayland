@@ -23,9 +23,23 @@ let
   # Touches de la rangée des chiffres pour les bureaux 1 à 5.
   touchesBureaux =
     if clavier == "fr" then
-      [ "ampersand" "eacute" "quotedbl" "apostrophe" "parenleft" ]
+      [
+        "ampersand"
+        "eacute"
+        "quotedbl"
+        "apostrophe"
+        "parenleft"
+      ]
     else
-      [ "1" "2" "3" "4" "5" ];
+      [
+        "1"
+        "2"
+        "3"
+        "4"
+        "5"
+      ];
+
+  terminal = if host == "r400" then "foot" else "ghostty";
 
   # Génère « Mod+touche → bureau n » et « Mod+Shift+touche → envoyer sur n ».
   raccourcisBureaux = lib.listToAttrs (
@@ -93,22 +107,42 @@ in
     spawn-at-startup = [
       { sh = "sleep 1 && awww img ${wallpaper}"; }
       # Ghostty reste chargé en arrière-plan : les fenêtres s'ouvrent instantanément.
-      { command = [ "systemctl" "--user" "start" "app-com.mitchellh.ghostty.service" ]; }
+      {
+        command = [
+          "systemctl"
+          "--user"
+          "start"
+          "app-com.mitchellh.ghostty.service"
+        ];
+      }
     ];
 
     hotkey-overlay.skip-at-startup = true;
 
     binds = raccourcisBureaux // {
       # ── Applis ─────────────────────────────────────────────────────
-      "Mod+Return".action.spawn = [ "ghostty" "+new-window" ];
+      "Mod+Return".action.spawn = [
+        terminal
+        "+new-window"
+      ];
       "Mod+D".action.spawn = "anyrun";
-      "Mod+E".action.spawn = [ "ghostty" "-e" "yazi" ];
+      "Mod+E".action.spawn = [
+        terminal
+        "-e"
+        "yazi"
+      ];
       "Mod+Shift+E".action.spawn = "thunar";
       "Mod+V".action.spawn = "presse-papiers"; # historique (home/bureau/lanceur.nix)
       "Mod+Shift+Escape".action.spawn = "menu-extinction";
       "Mod+Alt+L".action.spawn = "gtklock";
       "Mod+Shift+Slash".action.show-hotkey-overlay = [ ]; # aide des raccourcis
-      "Mod+B".action.spawn = [ "systemctl" "--user" "kill" "--signal=SIGUSR1" "waybar.service" ]; # masquer / afficher la barre 
+      "Mod+B".action.spawn = [
+        "systemctl"
+        "--user"
+        "kill"
+        "--signal=SIGUSR1"
+        "waybar.service"
+      ]; # masquer / afficher la barre
 
       # ── Fenêtres ───────────────────────────────────────────────────
       "Mod+Q".action.close-window = [ ];
@@ -156,25 +190,58 @@ in
       # ── Son, luminosité, musique (avec affichage swayosd) ──────────
       "XF86AudioRaiseVolume" = {
         allow-when-locked = true;
-        action.spawn = [ "swayosd-client" "--output-volume" "raise" ];
+        action.spawn = [
+          "swayosd-client"
+          "--output-volume"
+          "raise"
+        ];
       };
       "XF86AudioLowerVolume" = {
         allow-when-locked = true;
-        action.spawn = [ "swayosd-client" "--output-volume" "lower" ];
+        action.spawn = [
+          "swayosd-client"
+          "--output-volume"
+          "lower"
+        ];
       };
       "XF86AudioMute" = {
         allow-when-locked = true;
-        action.spawn = [ "swayosd-client" "--output-volume" "mute-toggle" ];
+        action.spawn = [
+          "swayosd-client"
+          "--output-volume"
+          "mute-toggle"
+        ];
       };
       "XF86AudioMicMute" = {
         allow-when-locked = true;
-        action.spawn = [ "swayosd-client" "--input-volume" "mute-toggle" ];
+        action.spawn = [
+          "swayosd-client"
+          "--input-volume"
+          "mute-toggle"
+        ];
       };
-      "XF86MonBrightnessUp".action.spawn = [ "swayosd-client" "--brightness" "raise" ];
-      "XF86MonBrightnessDown".action.spawn = [ "swayosd-client" "--brightness" "lower" ];
-      "XF86AudioPlay".action.spawn = [ "playerctl" "play-pause" ];
-      "XF86AudioNext".action.spawn = [ "playerctl" "next" ];
-      "XF86AudioPrev".action.spawn = [ "playerctl" "previous" ];
+      "XF86MonBrightnessUp".action.spawn = [
+        "swayosd-client"
+        "--brightness"
+        "raise"
+      ];
+      "XF86MonBrightnessDown".action.spawn = [
+        "swayosd-client"
+        "--brightness"
+        "lower"
+      ];
+      "XF86AudioPlay".action.spawn = [
+        "playerctl"
+        "play-pause"
+      ];
+      "XF86AudioNext".action.spawn = [
+        "playerctl"
+        "next"
+      ];
+      "XF86AudioPrev".action.spawn = [
+        "playerctl"
+        "previous"
+      ];
 
       # ── Session ────────────────────────────────────────────────────
       "Mod+Shift+P".action.power-off-monitors = [ ];

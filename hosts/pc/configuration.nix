@@ -103,8 +103,10 @@ in
   programs.steam = {
     enable = true;
     protontricks.enable = true;
+    extraPackages = [ pkgs.gamescope ];
   };
   programs.gamemode.enable = true;
+  programs.gamescope.enable = true;
 
   # ─── VR : WiVRn (Quest 3) ──────────────────────────────────────────────
   # Version 26.9 (recette d'unstable) compilée avec les bibliothèques du système,
