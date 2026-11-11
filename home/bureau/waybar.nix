@@ -11,7 +11,7 @@ let
 
   terminal = if host == "r400" then "foot" else "ghostty";
 
-  tui = cmd: terminal "-e ${cmd}"; # ouvre un outil en terminal
+  tui = cmd: "${terminal} -e ${cmd}"; # ouvre un outil en terminal
 
   # État du VPN Mullvad (bouton masqué si aucun pays n'est configuré).
   vpnEtat = pkgs.writeShellScriptBin "vpn-etat" ''
