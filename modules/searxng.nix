@@ -6,6 +6,7 @@
   config,
   lib,
   pkgs-unstable,
+  private,
   ...
 }:
 
@@ -23,7 +24,7 @@
         server = {
           bind_address = "127.0.0.1"; # accessible seulement depuis ce PC
           port = 8889;
-          secret_key = "jesucetoutleszboubsdepaname";
+          secret_key = private.searxngSecretKey; # dans le dépôt privé
           limiter = false; # inutile en usage perso
           image_proxy = true; # les images passent par SearXNG (vie privée)
           outgoing.source_ips = [ "0.0.0.0" ];

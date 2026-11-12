@@ -45,6 +45,6 @@
       })
     ];
 
-    home-manager.users.asap.home.packages = [ pkgs.bs-manager ];
+    home-manager.users.${config.rice.user}.home.packages = [ pkgs.bs-manager ];
   };
 }

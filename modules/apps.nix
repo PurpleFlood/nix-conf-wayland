@@ -34,7 +34,7 @@ in
     };
 
     # ─── Côté utilisateur ─────────────────────────────────────────────────
-    home-manager.users.asap = {
+    home-manager.users.${config.rice.user} = {
       programs.obs-studio.enable = true; # enregistrement / streaming
 
       home.packages = with pkgs; [

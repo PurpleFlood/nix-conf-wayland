@@ -33,6 +33,15 @@
       inputs.nixpkgs-stable.follows = "nixpkgs";
     };
 
+    # Tes données personnelles (IP du homelab, certificat, e-mail, favoris…),
+    # dans un dépôt PRIVÉ : seul toi peux le récupérer (clé SSH GitHub).
+    # Sans accès, utiliser l'exemple fourni :
+    #   nixos-rebuild build --flake .#<machine> --override-input private path:./private-example
+    private = {
+      url = "git+ssh://git@github.com/PurpleFlood/nix-private";
+      flake = false;
+    };
+
   };
 
   outputs =
@@ -44,6 +53,7 @@
       stylix,
       niri,
       zen-browser,
+      private,
       ...
     }:
     let
@@ -54,18 +64,29 @@
         config.allowUnfree = true;
       };
 
+      # Les valeurs du dépôt privé (son default.nix), passées à tous les modules.
+      privateData = import "${private}";
+
       # Fabrique une machine à partir de son dossier hosts/<nom>.
       # Toutes les machines chargent les MÊMES modules (modules/default.nix) :
-      # la base est toujours active, le reste s'allume dans hosts/<nom>/configuration.nix
-      # avec `rice.<module>.enable = true;`.
+      # le socle est toujours actif ; le profil (rice.profile) et les modules
+      # (rice.<module>.enable) se choisissent dans hosts/<nom>/configuration.nix.
       mkHost =
         host:
         nixpkgs.lib.nixosSystem {
           inherit system;
-          specialArgs = { inherit pkgs-unstable; };
+          specialArgs = {
+            inherit pkgs-unstable;
+            private = privateData;
+            # Modules home-manager venant d'autres flakes (utilisés par le profil niri et le module zen)
+            hmInputs = {
+              niri = niri.homeModules;
+              zen-browser = zen-browser.homeModules;
+            };
+          };
           modules = [
             ./hosts/${host}/configuration.nix
-            ./modules # base + modules optionnels
+            ./modules # socle + profils + modules optionnels
             { networking.hostName = nixpkgs.lib.mkDefault host; }
             stylix.nixosModules.stylix
 
@@ -74,20 +95,19 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.backupFileExtension = "hm-backup";
-              home-manager.extraSpecialArgs = { inherit pkgs-unstable; };
-              home-manager.sharedModules = [
-                niri.homeModules.config # option programs.niri.settings
-                niri.homeModules.stylix # couleurs Stylix appliquées à niri
-                zen-browser.homeModules.beta # option programs.zen-browser
-              ];
-              home-manager.users.asap = import ./home/asap.nix; # le rice de base
+              home-manager.extraSpecialArgs = {
+                inherit pkgs-unstable;
+                private = privateData;
+              };
             }
           ];
         };
     in
     {
-      # Base seule, pour installer n'importe quel PC (voir hosts/minimal).
+      # Profil niri seul, pour installer n'importe quel PC (voir hosts/minimal).
       nixosConfigurations.minimal = mkHost "minimal";
+      # Le portable prêté (profil simple, Cinnamon).
+      nixosConfigurations.sl510 = mkHost "sl510";
       nixosConfigurations.vm = mkHost "vm";
       nixosConfigurations.t470 = mkHost "t470";
       nixosConfigurations.pc = mkHost "pc";

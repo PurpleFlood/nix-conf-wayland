@@ -110,7 +110,7 @@ in
     ];
 
     # ─── Côté utilisateur ─────────────────────────────────────────────────
-    home-manager.users.asap = {
+    home-manager.users.${config.rice.user} = {
       home.packages = [ bitwig ];
 
       # Raccourcis du lanceur (les paquets n'en fournissent pas)

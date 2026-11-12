@@ -20,7 +20,7 @@
       qemu.swtpm.enable = true;
     };
     programs.virt-manager.enable = true;
-    users.users.asap.extraGroups = [ "libvirtd" ];
+    users.users.${config.rice.user}.extraGroups = [ "libvirtd" ];
 
     environment.systemPackages = [ pkgs.podman-compose ];
   };

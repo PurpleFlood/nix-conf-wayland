@@ -1,5 +1,5 @@
 # THINKPAD T470 : ce qui est propre à cette machine + les modules allumés.
-# Le rice de base vient de modules/base et home/.
+# Le socle vient de modules/core, le rice du profil niri (modules/profiles/niri + home/).
 { ... }:
 
 {

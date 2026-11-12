@@ -10,7 +10,7 @@
 let
   plugin = name: "${pkgs.anyrun}/lib/lib${name}.so";
 
-  # Menu « liste » : affiche l'entrée standard dans anyrun, renvoie le choice.
+  # Menu « liste » : affiche l'entrée standard dans anyrun, renvoie le choix.
   menu = ''${pkgs.anyrun}/bin/anyrun --plugins ${plugin "stdin"} --show-results-immediately true'';
 in
 {

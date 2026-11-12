@@ -14,11 +14,11 @@ if [ -n "$iface" ]; then
   jq -n -c --arg t "󰖂 ${city:-VPN}" \
     --arg tip "Connecté · $iface
 ${ip:-?} — ${city}${city:+, }${country}
-Clic : changer de country / déconnecter" \
+Clic : changer de pays / déconnecter" \
     '{text:$t, tooltip:$tip, class:"active"}'
 else
   jq -n -c --arg tip "VPN non connecté
 IP : ${ip:-?}
-Clic : choisir un country" \
+Clic : choisir un pays" \
     '{text:"󰖂", tooltip:$tip, class:"inactive"}'
 fi

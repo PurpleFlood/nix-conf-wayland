@@ -26,7 +26,7 @@ in
     # `sudo vpn …` sans mot de passe, pour le bouton de la barre.
     security.sudo.extraRules = [
       {
-        users = [ "asap" ];
+        users = [ config.rice.user ];
         commands = [
           {
             command = "/run/current-system/sw/bin/vpn";

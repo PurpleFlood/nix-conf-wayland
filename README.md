@@ -1,18 +1,28 @@
 # nix-conf-wayland
 
-Configuration NixOS de toutes mes machines, avec un rice **Wayland** autour de **niri**.
+Configuration NixOS de toutes mes machines, avec un rice **Wayland** autour de **niri**,
+et un profil **simple** (Cinnamon, Plasma ou XFCE) pour les machines que je prépare à des proches.
 Tout est déclaré ici : système, applis, rice, thème. Une machine se reconstruit
 avec un `git clone` et une commande.
 
+Les données personnelles (adresses du homelab, certificat, e-mail, favoris, clés SSH) sont dans
+un dépôt privé séparé, branché comme une entrée de la flake. Sans y avoir accès, on construit
+avec les fausses valeurs de `private-example/` :
+
+```
+nixos-rebuild build --flake .#minimal --impure --override-input private path:./private-example
+```
+
 ## Machines
 
-| Machine | Commande | Modules allumés |
+| Machine | Commande | Profil et modules |
 |---|---|---|
-| `minimal` | `sudo nixos-rebuild switch --flake .#minimal --impure` | aucun : la base seule, pour installer n'importe quel PC |
-| `pc` | `sudo nixos-rebuild switch --flake .#pc` | tout (NVIDIA RTX 3050, 2 écrans, Ghostty) |
-| `t470` | `sudo nixos-rebuild switch --flake .#t470` | apps, dev, music, virtualisation, zen, searxng, i2p, vpn, homeNetwork (QWERTY, Ghostty) |
-| `r400` | `sudo nixos-rebuild switch --flake .#r400` | dev (sans aiAgents), vpn, homeNetwork (Core 2 Duo, GMA 4500, BIOS) |
-| `vm` | `nix run .#vm` | aucun : machine virtuelle de test de la base |
+| `minimal` | `sudo nixos-rebuild switch --flake .#minimal --impure` | niri seul, pour installer n'importe quel PC |
+| `pc` | `sudo nixos-rebuild switch --flake .#pc` | niri + tout (NVIDIA RTX 3050, 2 écrans, Ghostty) |
+| `t470` | `sudo nixos-rebuild switch --flake .#t470` | niri + apps, dev, music, virtualisation, zen, searxng, i2p, vpn, homeNetwork (QWERTY, Ghostty) |
+| `r400` | `sudo nixos-rebuild switch --flake .#r400` | niri + dev (sans aiAgents), vpn, homeNetwork (Core 2 Duo, GMA 4500, BIOS) |
+| `sl510` | mises à jour automatiques chaque nuit | simple (Cinnamon) + tailscale, portable prêté |
+| `vm` | `nix run .#vm` | niri seul, machine virtuelle de test |
 
 Rebuild d'une autre machine depuis le PC (elle doit être allumée, SSH actif) :
 `nixos-rebuild switch --flake .#r400 --target-host asap@<ip> --sudo --ask-sudo-password`
@@ -20,6 +30,9 @@ Rebuild d'une autre machine depuis le PC (elle doit être allumée, SSH actif) :
 Après un premier changement de config sur une machine, préférer
 `sudo nixos-rebuild boot --flake .#<machine>` puis redémarrer : en cas de souci,
 la génération précédente reste disponible dans le menu de démarrage.
+
+Après une modification du dépôt privé (poussée sur GitHub) : `nix flake update private`,
+commit du `flake.lock`, puis rebuild.
 
 ## Le rice
 
@@ -45,24 +58,36 @@ la génération précédente reste disponible dans le menu de démarrage.
 
 ## Organisation
 
+Trois étages, chargés sur toutes les machines :
+
 | Chemin | Rôle |
 |---|---|
-| `flake.nix` | sources (nixpkgs, unstable, home-manager, Stylix, niri-flake, Zen) et liste des machines |
-| `modules/base/` | **la base, toujours active** : système, réseau, son, bureau (niri, ReGreet, gtklock), thème |
-| `modules/base/options.nix` | réglages par machine : `rice.keyboard`, `rice.terminal`, `rice.greeterDisabledOutputs` |
+| `modules/core/` | **le socle, toujours actif** : Nix, langue, comptes (admin + utilisateur), réseau, SSH, son, matériel |
+| `modules/core/options.nix` | `rice.profile`, `rice.admin`, `rice.user`, `rice.keyboard` |
+| `modules/profiles/niri/` | **profil niri** (par défaut) : niri, ReGreet, gtklock, Stylix + `home/` ; options `rice.terminal`, `rice.greeterDisabledOutputs` |
+| `modules/profiles/simple.nix` | **profil simple** : Cinnamon / Plasma / XFCE, Firefox normal, LibreOffice, impression, Flatpak, mises à jour automatiques |
 | `modules/<nom>.nix` | **un module optionnel** : tout ce qui le concerne (système ET utilisateur), éteint par défaut |
-| `home/` | le rice de base côté utilisateur : niri, waybar, anyrun, foot/Ghostty, fish, Neovim, Firefox |
-| `hosts/<machine>/` | **propre à une machine** : disques, démarrage, matériel, modules allumés (+ `home.nix` si besoin) |
+
+Et autour :
+
+| Chemin | Rôle |
+|---|---|
+| `flake.nix` | sources (nixpkgs, unstable, home-manager, Stylix, niri-flake, Zen, dépôt privé) et liste des machines |
+| `home/` | le rice côté utilisateur (profil niri) : niri, waybar, anyrun, foot/Ghostty, fish, Neovim, Firefox |
+| `hosts/<machine>/` | **propre à une machine** : disques, démarrage, matériel, profil et modules (+ `home.nix` si besoin) |
+| `hosts/hardware.nix` | trouve la config matérielle d'une machine pas encore dans le dépôt (installation) |
+| `private-example/` | forme du dépôt privé, avec de fausses valeurs |
 | `pkgs/` | paquets maison : pilote Wi-Fi Realtek du PC, commande `vpn` |
-| `dotfiles/` | fichiers modifiables reliés directement (Neovim, favoris, configs de jeux) |
+| `dotfiles/` | fichiers modifiables reliés directement (Neovim, configs de jeux) |
 | `wallpapers/` | fond d'écran (source de la palette) |
 
 ### Les modules
 
-Chaque module s'allume dans `hosts/<machine>/configuration.nix` :
+Le profil et les modules se choisissent dans `hosts/<machine>/configuration.nix` :
 
 ```nix
 rice = {
+  profile = "niri"; # ou "simple"
   terminal = "ghostty"; # foot par défaut (marche partout)
   gaming.enable = true;
   music.enable = true;
@@ -78,11 +103,12 @@ rice = {
 | `vr` | WiVRn (Quest), xrizer, ALCOM, vrc-get, Unity Hub, BSManager |
 | `ai` | Ollama (Vulkan), LM Studio, AnythingLLM, Heretic |
 | `virtualisation` | podman, virt-manager |
-| `zen` | navigateur Zen (favoris partagés avec le dépôt) |
+| `zen` | navigateur Zen (favoris dans le dépôt privé) |
 | `searxng` | moteur de recherche local (devient la recherche par défaut des navigateurs) |
 | `i2p` | réseau anonyme I2P |
 | `vpn` | commande `vpn` (Mullvad) + bouton dans la barre |
-| `homeNetwork` | DNS local + certificat Caddy (machines qui restent à la maison) |
+| `homeNetwork` | DNS local + certificat du homelab (machines qui restent à la maison) |
+| `tailscale` | accès à distance, où que soit la machine |
 
 Ajouter un paquet : dans le module qui lui correspond. Ajouter un module :
 copier un module existant, changer son nom, l'ajouter à `modules/default.nix`.
@@ -93,10 +119,20 @@ copier un module existant, changer son nom, l'ajouter à `modules/default.nix`.
    cloner le dépôt dans `/mnt/home/asap/git/nix-conf-wayland`, puis :
    `RICE_HARDWARE=/mnt/etc/nixos/hardware-configuration.nix nixos-install --flake .#minimal --impure`
    (BIOS : GRUB sur `/dev/sda`, ou `RICE_DISK=/dev/…` ; UEFI : systemd-boot, détecté tout seul).
-2. Sur la machine installée : créer `hosts/<nom>/` (copier `hosts/r400/` comme modèle),
-   y copier `/etc/nixos/hardware-configuration.nix`, allumer les modules voulus,
+   La clé live doit pouvoir lire le dépôt privé (clé SSH GitHub), sinon ajouter
+   `--override-input private path:./private-example`.
+2. Sur la machine installée : créer `hosts/<nom>/` (copier `hosts/r400/` ou `hosts/sl510/` comme modèle),
+   y copier `/etc/nixos/hardware-configuration.nix`, choisir le profil et les modules,
    ajouter `nixosConfigurations.<nom> = mkHost "<nom>";` dans `flake.nix`, `git add`, puis
    `sudo nixos-rebuild switch --flake .#<nom>` : la machine change de nom et de config.
+
+### Une machine pour un proche (profil simple)
+
+- Son compte (`rice.user`) n'a pas sudo ; le compte admin (`asap`, tes clés SSH) est caché de l'écran de connexion.
+- Chaque nuit, elle récupère la config sur GitHub et l'applique au redémarrage suivant.
+  Pour lire le dépôt privé, `root` a besoin d'une clé de déploiement GitHub en lecture seule
+  (`/root/.ssh/id_ed25519`, ajoutée dans les réglages du dépôt privé → Deploy keys).
+- Dépannage : `sudo tailscale up` une fois, puis `ssh asap@<machine>` d'où que tu sois.
 
 ## Raccourcis (Super = touche Windows)
 
@@ -150,9 +186,9 @@ copier un module existant, changer son nom, l'ajouter à `modules/default.nix`.
 ## Au quotidien
 
 - **Fond d'écran / couleurs** : remplacer l'image dans `wallpapers/` (et le chemin dans
-  `modules/base/theme.nix` si le nom change), `git add -A`, rebuild, se reconnecter.
+  `modules/profiles/niri/theme.nix` si le nom change), `git add -A`, rebuild, se reconnecter.
 - **Favoris** (Zen) : exportés à la fermeture du navigateur dans
-  `dotfiles/bookmarks.html`, réimportés au démarrage. Les commiter pour les garder.
+  le dépôt privé (`~/git/nix-private/bookmarks.html`), réimportés au démarrage. Les commiter pour les garder.
 - **Neovim** : config dans `dotfiles/nvim`, modifiable sans rebuild.
 - **VPN** : clic sur 󰖂 dans la barre, ou `sudo vpn <pays> | off | status | list`.
   Les fichiers Mullvad restent dans `/etc/wireguard/<pays>/` (hors dépôt).

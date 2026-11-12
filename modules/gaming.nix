@@ -9,7 +9,7 @@ let
   link =
     path:
     pkgs.runCommandLocal (baseNameOf path) { } ''
-      ln -s ${lib.escapeShellArg "/home/asap/git/nix-conf-wayland/dotfiles/games/${path}"} $out
+      ln -s ${lib.escapeShellArg "/home/${config.rice.user}/git/nix-conf-wayland/dotfiles/games/${path}"} $out
     '';
 
   # Prism Launcher + chargeur OpenXR si la VR est active (Vivecraft → WiVRn).
@@ -37,7 +37,7 @@ in
     programs.gamescope.enable = true;
 
     # ─── Côté utilisateur ─────────────────────────────────────────────────
-    home-manager.users.asap = {
+    home-manager.users.${config.rice.user} = {
       xdg.configFile = {
         "heroic/config.json".source = link "heroic-config.json";
         "MangoHud".source = link "MangoHud";

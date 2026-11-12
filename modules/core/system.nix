@@ -1,7 +1,15 @@
-# SOCLE commun à toutes les machines : Nix, langue, utilisateur, réseau, son, matériel.
-# Partie de la base : actif partout.
-{ lib, pkgs, ... }:
+# SOCLE commun à toutes les machines : Nix, langue, comptes, réseau, son, matériel.
+{
+  config,
+  lib,
+  pkgs,
+  private,
+  ...
+}:
 
+let
+  inherit (config.rice) admin user;
+in
 {
   # ─── Nix ───────────────────────────────────────────────────────────────
   nix.settings = {
@@ -20,22 +28,40 @@
   # ─── Langue, heure, clavier ────────────────────────────────────────────
   time.timeZone = "Europe/Paris";
   i18n.defaultLocale = "fr_FR.UTF-8";
-  # (clavier : option rice.keyboard, dans base/options.nix)
+  # (clavier : option rice.keyboard, dans core/options.nix)
 
-  # ─── Utilisateur ───────────────────────────────────────────────────────
-  # bash reste le shell de connexion (il prépare la session) ;
-  # c'est le terminal (foot ou Ghostty) qui lance fish.
-  users.users.asap = {
-    isNormalUser = true;
-    description = "asap";
-    extraGroups = [
-      "wheel"
-      "video"
-      "audio"
-      "networkmanager"
-      "input"
-    ];
-    initialPassword = "nixos"; # à changer avec `passwd` sur une vraie machine
+  # ─── Comptes ──────────────────────────────────────────────────────────
+  # Le compte admin (toi) existe partout ; tes clés SSH (dépôt privé) y donnent
+  # accès sans mot de passe. bash reste le shell de connexion.
+  users.users = {
+    ${admin} = {
+      isNormalUser = true;
+      description = admin;
+      extraGroups = [
+        "wheel"
+        "video"
+        "audio"
+        "networkmanager"
+        "input"
+      ];
+      initialPassword = "nixos"; # à changer avec `passwd` dès l'installation
+      openssh.authorizedKeys.keys = private.sshKeys;
+    };
+  }
+  # La personne qui utilise le bureau, si ce n'est pas toi : compte normal,
+  # sans sudo (elle ne peut pas casser le système).
+  // lib.optionalAttrs (user != admin) {
+    ${user} = {
+      isNormalUser = true;
+      extraGroups = [
+        "video"
+        "audio"
+        "networkmanager"
+        "lp" # imprimantes
+        "scanner"
+      ];
+      initialPassword = "nixos"; # à changer à la première connexion
+    };
   };
 
   # ─── Réseau : NetworkManager, avec iwd comme moteur Wi-Fi ──────────────
@@ -44,7 +70,7 @@
     wifi.backend = "iwd";
   };
 
-  # Chaque machine s'annonce sur le réseau local : ssh asap@r400.local
+  # Chaque machine s'annonce sur le réseau local : ssh asap@<machine>.local
   services.avahi = {
     enable = true;
     nssmdns4 = true; # le système sait résoudre les noms en .local
@@ -55,7 +81,10 @@
   };
 
   # Accès SSH entre tes machines (dépannage, rebuilds à distance).
-  services.openssh.enable = true;
+  services.openssh = {
+    enable = true;
+    settings.PermitRootLogin = "no";
+  };
 
   # ─── Son : PipeWire (JACK basse latence : module musique) ──────────────
   security.rtkit.enable = true;
@@ -68,17 +97,17 @@
   # ─── Matériel ──────────────────────────────────────────────────────────
   hardware.enableRedistributableFirmware = true; # Wi-Fi, microcode…
   hardware.bluetooth.enable = true;
-  services.udisks2.enable = true; # montage des clés USB (utilisé par udiskie)
+  services.udisks2.enable = true; # montage des clés USB
   services.power-profiles-daemon.enable = true; # modes économie / équilibré / performance
   services.upower.enable = true; # niveau de batterie (pour waybar)
 
-  # Portables : capot fermé = mise en veille (gtklock verrouille juste avant).
+  # Portables : capot fermé = mise en veille.
   services.logind.settings.Login = {
     HandleLidSwitch = "suspend";
     HandleLidSwitchExternalPower = "suspend";
   };
 
-  # ─── Paquets système de base (le reste est dans home/) ─────────────────
+  # ─── Paquets système de base ───────────────────────────────────────────
   environment.systemPackages = with pkgs; [
     git
     wget

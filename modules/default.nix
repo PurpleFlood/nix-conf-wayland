@@ -1,10 +1,12 @@
-# TOUS LES MODULES, chargés sur toutes les machines.
+# TOUS LES MODULES, chargés sur toutes les machines. Trois étages :
 #
-# - base/ : toujours actif. Le rice minimal qui tourne sur n'importe quel PC.
-# - les autres : éteints par défaut. On les allume machine par machine,
-#   dans hosts/<machine>/configuration.nix :
-#
-#     rice.gaming.enable = true;
+# 1. core/      : le socle, toujours actif (Nix, comptes, réseau, son, matériel).
+# 2. profiles/  : le bureau, un seul par machine :
+#                   rice.profile = "niri";     # ton rice (par défaut)
+#                   rice.profile = "simple";   # bureau classique pour débutant
+# 3. les modules ci-dessous : éteints par défaut, à allumer machine par machine
+#    dans hosts/<machine>/configuration.nix :
+#                   rice.gaming.enable = true;
 #
 # Pour ajouter un paquet : le mettre dans le module qui lui correspond.
 # Pour ajouter un module : créer le fichier (copier un module existant comme
@@ -13,7 +15,8 @@
 
 {
   imports = [
-    ./base
+    ./core
+    ./profiles
 
     # ─── Modules optionnels (rice.<nom>.enable) ───────────────────────────
     ./apps.nix # applis généralistes : Discord, LibreOffice, Blender…
@@ -27,6 +30,7 @@
     ./searxng.nix # moteur de recherche local
     ./i2p.nix # réseau anonyme I2P
     ./vpn.nix # commande `vpn` (Mullvad / WireGuard)
-    ./home-network.nix # DNS local + certificat Caddy (réseau de la maison)
+    ./home-network.nix # DNS local + certificat (réseau de la maison)
+    ./tailscale.nix # accès à distance à la machine, où qu'elle soit
   ];
 }

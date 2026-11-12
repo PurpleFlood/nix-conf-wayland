@@ -1,5 +1,5 @@
 # PC FIXE : ce qui est propre à cette machine (matériel) + les modules allumés.
-# Le rice de base vient de modules/base et home/ ;
+# Le socle vient de modules/core, le rice du profil niri (modules/profiles/niri + home/) ;
 # les réglages utilisateur propres au PC (écrans…) sont dans ./home.nix.
 { config, ... }:
 
@@ -33,7 +33,7 @@ in
   };
 
   # Écrans, bureaux et réglages utilisateur propres au PC
-  home-manager.users.asap.imports = [ ./home.nix ];
+  home-manager.users.${config.rice.user}.imports = [ ./home.nix ];
 
   # ─── Démarrage : Limine (thème et fond appliqués par Stylix) ────────────
   boot.loader.limine = {

@@ -1,7 +1,7 @@
 #!/bin/bash
 # vpn : connexion Mullvad (WireGuard) par pays, sur le serveur le plus rapide.
 #
-#   vpn <pays>   se connecte au best serveur du dossier /etc/wireguard/<pays>/
+#   vpn <pays>   se connecte au meilleur serveur du dossier /etc/wireguard/<pays>/
 #   vpn off      se déconnecte
 #   vpn status   affiche la connexion en cours
 #   vpn list     liste les pays disponibles
@@ -10,7 +10,7 @@
 
 DIR="${VPN_DIR:-/etc/wireguard}"
 
-# Interfaces WireGuard active_interfaces
+# Interfaces WireGuard actives
 active_interfaces() { wg show interfaces 2>/dev/null; }
 
 # Retrouve le fichier .conf d'une interface active
@@ -51,7 +51,7 @@ case "${1:-}" in
     country="$1"
     [ -d "$DIR/$country" ] || { echo "Pays inconnu : $country (voir : vpn list)"; exit 1; }
 
-    # On se déconnecte d'abord : le kill switch bloquerait les tests de latency
+    # On se déconnecte d'abord : le kill switch bloquerait les tests de latence
     disconnect
 
     best=""; best_ms=9999

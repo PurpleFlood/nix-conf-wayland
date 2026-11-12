@@ -1,10 +1,10 @@
-# TON UTILISATEUR (home-manager) : le rice de BASE, actif sur toutes les machines.
+# TON UTILISATEUR (home-manager) : le rice, importé par le profil niri.
 # Chaque brique du rice a son fichier dans home/desktop/.
 #
 # Les modules optionnels (modules/*.nix) ajoutent leur partie utilisateur
 # eux-mêmes ; les réglages propres à une machine (écrans…) sont dans
 # hosts/<machine>/home.nix.
-{ pkgs, ... }:
+{ pkgs, private, ... }:
 
 {
   imports = [
@@ -20,9 +20,6 @@
     ./browsers/firefox.nix # réglages communs : browsers/browser-common.nix
   ];
 
-  home.username = "asap";
-  home.homeDirectory = "/home/asap";
-
   # Icônes (Stylix gère couleurs, polices et curseur, pas les icônes).
   stylix.icons = {
     enable = true;
@@ -31,12 +28,10 @@
     light = "Papirus-Light";
   };
 
+  # Identité git : dans le dépôt privé.
   programs.git = {
     enable = true;
-    settings.user = {
-      name = "PurpleFlood";
-      email = "flygus.games@gmail.com";
-    };
+    settings.user = private.git;
   };
 
   home.stateVersion = "26.05";

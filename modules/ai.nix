@@ -43,7 +43,7 @@ in
       "f /var/lib/anythingllm/.env 0644 1000 1000 -"
     ];
 
-    home-manager.users.asap.home.packages = [
+    home-manager.users.${config.rice.user}.home.packages = [
       pkgs.lmstudio
       heretic
     ];

@@ -3,16 +3,23 @@
 # avec le dépôt. Se lance avec `zen-beta`.
 #
 #   rice.zen.enable = true;
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  private,
+  hmInputs,
+  ...
+}:
 
 let
   common = import ../home/browsers/browser-common.nix {
     searxng = config.rice.searxng.enable;
   };
 
-  # Favoris partagés : exportés à la fermeture, réimportés au démarrage.
+  # Favoris : exportés à la fermeture, réimportés au démarrage, dans ton clone
+  # du dépôt privé (le chemin est dans private.bookmarksFile).
   bookmarks = {
-    "browser.bookmarks.file" = "/home/asap/git/nix-conf-wayland/dotfiles/bookmarks.html";
+    "browser.bookmarks.file" = private.bookmarksFile;
     "browser.bookmarks.autoExportHTML" = true; # fermeture → écrit le fichier
     "browser.places.importBookmarksHTML" = true; # démarrage → relit le fichier
   };
@@ -21,7 +28,9 @@ in
   options.rice.zen.enable = lib.mkEnableOption "le navigateur Zen";
 
   config = lib.mkIf config.rice.zen.enable {
-    home-manager.users.asap = {
+    home-manager.users.${config.rice.user} = {
+      imports = [ hmInputs.zen-browser.beta ]; # option programs.zen-browser
+
       programs.zen-browser = {
         enable = true;
         # Mets `true` si tu veux que Zen ouvre les liens à la place de Firefox.

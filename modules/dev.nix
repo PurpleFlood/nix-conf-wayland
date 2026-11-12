@@ -23,7 +23,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    home-manager.users.asap.home.packages =
+    home-manager.users.${config.rice.user}.home.packages =
       with pkgs;
       [
         # Compilation
