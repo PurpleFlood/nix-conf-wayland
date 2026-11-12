@@ -1,5 +1,5 @@
-# THINKPAD T470 : ce qui est propre à cette machine.
-# Le rice commun (niri, waybar…) vient de modules/ et home/.
+# THINKPAD T470 : ce qui est propre à cette machine + les modules allumés.
+# Le rice de base vient de modules/base et home/.
 { ... }:
 
 {
@@ -8,7 +8,21 @@
     ./hardware-configuration.nix
   ];
 
-  networking.hostName = "t470";
+  # ─── Modules et réglages du rice ───────────────────────────────────────
+  rice = {
+    clavier = "us"; # clavier physique en QWERTY
+    terminal = "ghostty";
+
+    applis.enable = true;
+    dev.enable = true;
+    musique.enable = true;
+    virtualisation.enable = true;
+    zen.enable = true;
+    searxng.enable = true;
+    i2p.enable = true;
+    vpn.enable = true;
+    maison.enable = true;
+  };
 
   # ─── Démarrage : Limine (thème et fond appliqués par Stylix) ────────────
   boot.loader.limine = {
@@ -18,28 +32,6 @@
   };
   boot.loader.efi.canTouchEfiVariables = true;
   boot.tmp.useTmpfs = true;
-
-  # ─── Matériel ──────────────────────────────────────────────────────────
-  hardware.enableRedistributableFirmware = true; # Wi-Fi Intel, microcode
-
-  # Clavier physique en QWERTY (le rice est en AZERTY par défaut).
-  console.keyMap = "us";
-
-  # Capot fermé : mise en veille (gtklock verrouille juste avant, via swayidle).
-  services.logind.settings.Login = {
-    HandleLidSwitch = "suspend";
-    HandleLidSwitchExternalPower = "suspend";
-  };
-
-  # Accès SSH depuis le PC (pratique pour dépanner) : ssh asap@t470
-  services.openssh.enable = true;
-
-  # ─── Nix : ménage automatique des vieilles générations ─────────────────
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 14d";
-  };
 
   # Version de la PREMIÈRE installation du T470 : ne pas changer.
   system.stateVersion = "26.05";

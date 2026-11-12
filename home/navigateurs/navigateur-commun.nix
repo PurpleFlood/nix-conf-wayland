@@ -1,6 +1,11 @@
 # Réglages PARTAGÉS par Firefox et Zen (Zen est basé sur Firefox).
 # Ce n'est pas un module : juste des valeurs, utilisées par firefox.nix et zen.nix.
 # Change quelque chose ici → les deux navigateurs suivent.
+#
+# `searxng` : vrai si le module searxng est actif sur la machine ; sinon la
+# recherche par défaut passe sur DuckDuckGo.
+{ searxng }:
+
 let
   # Installe une extension depuis addons.mozilla.org, toujours à jour.
   # `id` : identifiant de l'extension, `slug` : son nom dans l'URL du site.
@@ -59,8 +64,8 @@ in
   # ─── Moteurs de recherche ──────────────────────────────────────────────
   search = {
     force = true; # Nix est la référence pour les moteurs de recherche
-    default = "searxng";
-    privateDefault = "searxng";
+    default = if searxng then "searxng" else "ddg";
+    privateDefault = if searxng then "searxng" else "ddg";
     engines = {
       searxng = {
         name = "SearXNG";

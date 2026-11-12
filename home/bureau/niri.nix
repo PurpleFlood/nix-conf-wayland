@@ -8,17 +8,18 @@
 #   Mod + 1 à 5                   aller au bureau 1 à 5 (& é " ' ( en AZERTY)
 {
   config,
+  osConfig,
   lib,
   pkgs,
-  host,
   ...
 }:
 
 let
   wallpaper = config.stylix.image;
 
-  # Disposition du clavier selon la machine : le T470 est en QWERTY.
-  clavier = if host == "t470" then "us" else "fr";
+  # Disposition du clavier : option rice.clavier (le T470 est en QWERTY).
+  clavier = osConfig.rice.clavier;
+  ghostty = osConfig.rice.terminal == "ghostty";
 
   # Touches de la rangée des chiffres pour les bureaux 1 à 5.
   touchesBureaux =
@@ -38,8 +39,6 @@ let
         "4"
         "5"
       ];
-
-  terminal = if host == "r400" then "foot" else "ghostty";
 
   # Génère « Mod+touche → bureau n » et « Mod+Shift+touche → envoyer sur n ».
   raccourcisBureaux = lib.listToAttrs (
@@ -106,35 +105,31 @@ in
     # Fond d'écran posé au démarrage (le démon awww est lancé par systemd).
     spawn-at-startup = [
       { sh = "sleep 1 && awww img ${wallpaper}"; }
-      # Ghostty reste chargé en arrière-plan : les fenêtres s'ouvrent instantanément.
-      {
-        command = [
-          "systemctl"
-          "--user"
-          "start"
-          "app-com.mitchellh.ghostty.service"
-        ];
-      }
-    ];
+    ]
+    # Ghostty reste chargé en arrière-plan : les fenêtres s'ouvrent instantanément.
+    ++ lib.optional ghostty {
+      command = [
+        "systemctl"
+        "--user"
+        "start"
+        "app-com.mitchellh.ghostty.service"
+      ];
+    };
 
     hotkey-overlay.skip-at-startup = true;
 
     binds = raccourcisBureaux // {
       # ── Applis ─────────────────────────────────────────────────────
       "Mod+Return".action.spawn =
-        if host == "r400" then
-          [ "foot" ]
-        else
+        if ghostty then
           [
             "ghostty"
             "+new-window"
-          ];
+          ]
+        else
+          [ "foot" ];
       "Mod+D".action.spawn = "anyrun";
-      "Mod+E".action.spawn = [
-        terminal
-        "-e"
-        "yazi"
-      ];
+      "Mod+E".action.spawn-sh = "${osConfig.rice.lancerDansTerminal} yazi";
       "Mod+Shift+E".action.spawn = "thunar";
       "Mod+V".action.spawn = "presse-papiers"; # historique (home/bureau/lanceur.nix)
       "Mod+Shift+Escape".action.spawn = "menu-extinction";

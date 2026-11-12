@@ -1,10 +1,21 @@
 # THINKPAD R400 : machine légère (Core 2 Duo, 3 Go, GMA 4500).
+# Base seule + quelques modules légers.
 { ... }:
 
 {
   imports = [ ./hardware-configuration.nix ]; # généré à l'installation
 
-  networking.hostName = "r400";
+  # ─── Modules et réglages du rice ───────────────────────────────────────
+  # foot (terminal par défaut) : la GMA 4500 n'a qu'OpenGL 2.1, Ghostty ne
+  # démarre pas.
+  rice = {
+    dev = {
+      enable = true;
+      agentsIA = false; # Claude Code / opencode : pas d'AVX sur le Core 2 Duo
+    };
+    vpn.enable = true;
+    maison.enable = true;
+  };
 
   # BIOS classique (pas d'UEFI) : GRUB sur le disque entier.
   boot.loader.grub = {
@@ -13,28 +24,13 @@
     configurationLimit = 5;
   };
 
-  hardware.enableRedistributableFirmware = true;
   hardware.cpu.intel.updateMicrocode = true;
 
-  # Peu de RAM : mémoire compressée + tueur de processus avant le gel.
-  zramSwap = {
-    enable = true;
-    memoryPercent = 50;
-  };
-  services.earlyoom.enable = true;
+  # Peu de RAM : plus de mémoire compressée (zram et earlyoom sont dans la base).
+  zramSwap.memoryPercent = 50;
 
-  services.logind.settings.Login = {
-    HandleLidSwitch = "suspend";
-    HandleLidSwitchExternalPower = "suspend";
-  };
-
-  services.openssh.enable = true; # ssh asap@r400 depuis le PC
-
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 7d";
-  };
+  # Petit disque : ménage plus fréquent.
+  nix.gc.options = "--delete-older-than 7d";
 
   system.stateVersion = "26.05";
 }

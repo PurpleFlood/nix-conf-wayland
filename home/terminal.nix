@@ -1,11 +1,11 @@
-# TERMINAL : Ghostty, qui lance Nushell.
+# TERMINAL : foot (partout) ou Ghostty (option rice.terminal), qui lancent fish.
 # + starship (prompt), zoxide (`z dossier`), carapace (autocomplétion).
 # Couleurs et police : Stylix.
-{ pkgs, host, ... }:
+{ osConfig, pkgs, ... }:
 
 {
   programs.ghostty = {
-    enable = host != "r400";
+    enable = osConfig.rice.terminal == "ghostty"; # demande OpenGL 3.3
     settings = {
       command = "${pkgs.fish}/bin/fish";
       window-padding-x = 10;
@@ -16,7 +16,7 @@
   };
 
   programs.foot = {
-    enable = host == "r400";
+    enable = osConfig.rice.terminal == "foot"; # rendu par le processeur : marche partout
     settings.main = {
       shell = "${pkgs.fish}/bin/fish";
       pad = "10x10";

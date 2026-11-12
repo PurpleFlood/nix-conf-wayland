@@ -6,15 +6,20 @@ avec un `git clone` et une commande.
 
 ## Machines
 
-| Machine | Commande | Particularités |
+| Machine | Commande | Modules allumés |
 |---|---|---|
-| `t470` | `sudo nixos-rebuild switch --flake .#t470` | ThinkPad, clavier QWERTY, Intel, deux batteries |
-| `pc` | `sudo nixos-rebuild switch --flake .#pc` | PC fixe, AZERTY, NVIDIA RTX 3050, 2 écrans (bientôt 3), jeux, VR |
-| `vm` | `nix run .#vm` | machine virtuelle de test (sans 3D sur un hôte NVIDIA) |
+| `minimal` | `sudo nixos-rebuild switch --flake .#minimal --impure` | aucun : la base seule, pour installer n'importe quel PC |
+| `pc` | `sudo nixos-rebuild switch --flake .#pc` | tout (NVIDIA RTX 3050, 2 écrans, Ghostty) |
+| `t470` | `sudo nixos-rebuild switch --flake .#t470` | applis, dev, musique, virtualisation, Zen, SearXNG, I2P, VPN, maison (QWERTY, Ghostty) |
+| `r400` | `sudo nixos-rebuild switch --flake .#r400` | dev (sans agents IA), VPN, maison (Core 2 Duo, GMA 4500, BIOS) |
+| `vm` | `nix run .#vm` | aucun : machine virtuelle de test de la base |
+
+Rebuild d'une autre machine depuis le PC (elle doit être allumée, SSH actif) :
+`nixos-rebuild switch --flake .#r400 --target-host asap@<ip> --sudo --ask-sudo-password`
 
 Après un premier changement de config sur une machine, préférer
 `sudo nixos-rebuild boot --flake .#<machine>` puis redémarrer : en cas de souci,
-la génération précédente reste disponible dans le menu Limine.
+la génération précédente reste disponible dans le menu de démarrage.
 
 ## Le rice
 
@@ -23,7 +28,7 @@ la génération précédente reste disponible dans le menu Limine.
 | Compositeur (fenêtres, effets, écrans, raccourcis) | niri (config en Nix via niri-flake) |
 | Connexion | greetd + ReGreet (dans un mini-niri : un seul écran, bon clavier) |
 | Barre | waybar |
-| Terminal / shell | Ghostty (en service, ouverture instantanée) + Nushell, starship, zoxide, carapace |
+| Terminal / shell | foot (partout) ou Ghostty (en service, ouverture instantanée) + fish, starship, zoxide, carapace |
 | Lanceur et menus | anyrun (en démon) |
 | Notifications | mako |
 | Verrouillage / veille | gtklock + swayidle |
@@ -36,24 +41,62 @@ la génération précédente reste disponible dans le menu Limine.
 | Son | PipeWire (+ JACK pour Reaper) + wiremix + qpwgraph |
 | Volume / luminosité / lumière bleue | swayosd, wlsunset |
 | Éditeur | Neovim + AstroNvim (thème propre, hors Stylix) |
-| Navigateurs | Zen et Firefox (extensions, SearXNG par défaut, favoris partagés) |
+| Navigateurs | Firefox (base) et Zen (module) : extensions, SearXNG par défaut s'il est actif |
 
 ## Organisation
 
 | Chemin | Rôle |
 |---|---|
 | `flake.nix` | sources (nixpkgs, unstable, home-manager, Stylix, niri-flake, Zen) et liste des machines |
-| `hosts/<machine>/` | **propre à une machine** : disques, démarrage, matériel, clavier |
-| `modules/` | **système, commun** : socle, bureau, thème, réseau, VPN, SearXNG, musique, outils |
-| `home/` | **utilisateur, commun** : le rice et les applis |
-| `home/bureau/` | niri, waybar, anyrun, mako, veille, petits services, scripts de la barre |
-| `home/<machine>.nix` | réglages utilisateur propres à une machine (ex. `home/pc.nix` : écrans, jeux, VR) |
+| `modules/base/` | **la base, toujours active** : système, réseau, son, bureau (niri, ReGreet, gtklock), thème |
+| `modules/base/options.nix` | réglages par machine : `rice.clavier`, `rice.terminal`, `rice.ecransConnexionEteints` |
+| `modules/<nom>.nix` | **un module optionnel** : tout ce qui le concerne (système ET utilisateur), éteint par défaut |
+| `home/` | le rice de base côté utilisateur : niri, waybar, anyrun, foot/Ghostty, fish, Neovim, Firefox |
+| `hosts/<machine>/` | **propre à une machine** : disques, démarrage, matériel, modules allumés (+ `home.nix` si besoin) |
 | `pkgs/` | paquets maison : pilote Wi-Fi Realtek du PC, commande `vpn` |
 | `dotfiles/` | fichiers modifiables reliés directement (Neovim, favoris, configs de jeux) |
 | `wallpapers/` | fond d'écran (source de la palette) |
 
-Règle simple : **le rice et les applis dans `home/` et `modules/`**,
-**les particularités de chaque machine dans `hosts/` et `home/<machine>.nix`**.
+### Les modules
+
+Chaque module s'allume dans `hosts/<machine>/configuration.nix` :
+
+```nix
+rice = {
+  terminal = "ghostty"; # foot par défaut (marche partout)
+  gaming.enable = true;
+  musique.enable = true;
+};
+```
+
+| Module | Contenu |
+|---|---|
+| `applis` | Discord, Mumble, LibreOffice, Obsidian, Blender, Krita, Spotify, OBS, Twitch, Flatpak, AppImage… |
+| `dev` | cmake, Rust, JDK, .NET, Ghidra, Ansible ; `dev.agentsIA` : Claude Code, opencode (processeur avec AVX) |
+| `musique` | Reaper, Bitwig, Vital, VCV Rack, Cardinal, yabridge, JACK basse latence |
+| `gaming` | Steam (Proton, gamescope, NTSync), Heroic, Lutris, Prism Launcher, MangoHud |
+| `vr` | WiVRn (Quest), xrizer, ALCOM, vrc-get, Unity Hub, BSManager |
+| `ia` | Ollama (Vulkan), LM Studio, AnythingLLM, Heretic |
+| `virtualisation` | podman, virt-manager |
+| `zen` | navigateur Zen (favoris partagés avec le dépôt) |
+| `searxng` | moteur de recherche local (devient la recherche par défaut des navigateurs) |
+| `i2p` | réseau anonyme I2P |
+| `vpn` | commande `vpn` (Mullvad) + bouton dans la barre |
+| `maison` | DNS local + certificat Caddy (machines qui restent à la maison) |
+
+Ajouter un paquet : dans le module qui lui correspond. Ajouter un module :
+copier un module existant, changer son nom, l'ajouter à `modules/default.nix`.
+
+### Installer une nouvelle machine
+
+1. Depuis la clé live : partitionner, monter sur `/mnt`, `nixos-generate-config --root /mnt`,
+   cloner le dépôt dans `/mnt/home/asap/git/nix-conf-wayland`, puis :
+   `RICE_MATERIEL=/mnt/etc/nixos/hardware-configuration.nix nixos-install --flake .#minimal --impure`
+   (BIOS : GRUB sur `/dev/sda`, ou `RICE_DISQUE=/dev/…` ; UEFI : systemd-boot, détecté tout seul).
+2. Sur la machine installée : créer `hosts/<nom>/` (copier `hosts/r400/` comme modèle),
+   y copier `/etc/nixos/hardware-configuration.nix`, allumer les modules voulus,
+   ajouter `nixosConfigurations.<nom> = mkHost "<nom>";` dans `flake.nix`, `git add`, puis
+   `sudo nixos-rebuild switch --flake .#<nom>` : la machine change de nom et de config.
 
 ## Raccourcis (Super = touche Windows)
 
@@ -107,23 +150,16 @@ Règle simple : **le rice et les applis dans `home/` et `modules/`**,
 ## Au quotidien
 
 - **Fond d'écran / couleurs** : remplacer l'image dans `wallpapers/` (et le chemin dans
-  `modules/theme.nix` si le nom change), `git add -A`, rebuild, se reconnecter.
-- **Favoris** (Zen et Firefox) : exportés à la fermeture du navigateur dans
+  `modules/base/theme.nix` si le nom change), `git add -A`, rebuild, se reconnecter.
+- **Favoris** (Zen) : exportés à la fermeture du navigateur dans
   `dotfiles/favoris.html`, réimportés au démarrage. Les commiter pour les garder.
 - **Neovim** : config dans `dotfiles/nvim`, modifiable sans rebuild.
 - **VPN** : clic sur 󰖂 dans la barre, ou `sudo vpn <pays> | off | status | list`.
   Les fichiers Mullvad restent dans `/etc/wireguard/<pays>/` (hors dépôt).
-- **SearXNG** : http://localhost:8888
+- **SearXNG** (module `searxng`) : http://localhost:8889
 - **GitHub** : une seule fois par machine, `gh auth login`.
 - **Paquets très récents** : `pkgs-unstable.<nom>` ; pour les mettre à jour,
   `nix flake update nixpkgs-unstable` puis rebuild.
-
-## Nushell : les pièges
-
-Nushell n'est pas compatible bash :
-- `&&` → `;` (ou `and` dans un test) ;
-- pas de `$(…)`, `export`, `VAR=x commande` ;
-- pour une commande trouvée sur internet : `bash -c "…"`.
 
 ## Ménage
 

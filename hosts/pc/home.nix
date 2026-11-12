@@ -1,24 +1,8 @@
-# PC FIXE (côté utilisateur) : écrans, jeux, VR, montage vidéo.
-# Importé automatiquement par home/asap.nix sur la machine « pc ».
-{
-  config,
-  osConfig,
-  lib,
-  pkgs,
-  ...
-}:
+# PC FIXE (côté utilisateur) : écrans, bureaux, carte NVIDIA.
+# Importé par hosts/pc/configuration.nix. Les jeux, la VR et l'IA sont
+# dans leurs modules (modules/gaming.nix, vr.nix, ia.nix).
+{ lib, pkgs, ... }:
 
-let
-  # Fichiers de config modifiables, rangés dans le dépôt (dotfiles/pc/).
-  dots = "${config.home.homeDirectory}/git/nix-conf-wayland/dotfiles/pc";
-  lien = chemin: config.lib.file.mkOutOfStoreSymlink "${dots}/${chemin}";
-
-  # Heretic via uv : le PyTorch de PyPI embarque CUDA (celui de nixpkgs est CPU)
-  heretic = pkgs.writeShellScriptBin "heretic" ''
-    export LD_LIBRARY_PATH=/run/opengl-driver/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
-    exec ${pkgs.uv}/bin/uvx --python 3.12 --from heretic-llm heretic "$@"
-  '';
-in
 {
   # ─── Écrans ────────────────────────────────────────────────────────────
   # Noms à vérifier avec `niri msg outputs` (sous Wayland, NVIDIA ne les
@@ -85,34 +69,13 @@ in
     "Mod+Shift+Ctrl+L".action.move-column-to-monitor-right = [ ];
   };
 
-  # ─── Jeux ──────────────────────────────────────────────────────────────
-  xdg.configFile = {
-    "heroic/config.json".source = lien "heroic-config.json";
-    "MangoHud".source = lien "MangoHud";
-  };
-  home.file.".local/share/PrismLauncher/prismlauncher.cfg".source = lien "prismlauncher.cfg";
-
+  # ─── Carte NVIDIA ──────────────────────────────────────────────────────
+  # Cache des shaders persistant (10 Go)
   home.sessionVariables = {
-    # Cache des shaders persistant (10 Go) + overlay MangoHud partout
     __GL_SHADER_DISK_CACHE_SIZE = "10737418240";
     __GL_SHADER_DISK_CACHE_SKIP_CLEANUP = "1";
-    MANGOHUD = "1";
   };
 
-  # ─── Applis propres au PC ──────────────────────────────────────────────
-  home.packages = with pkgs; [
-    lmstudio
-    mangohud
-    # + chargeur OpenXR, nécessaire à Vivecraft (xrizer → WiVRn)
-    (prismlauncher.override { additionalLibs = [ openxr-loader ]; })
-    heroic
-    lutris
-    protonplus
-    protonup-rs
-    davinci-resolve # montage vidéo (a besoin de la carte NVIDIA)
-    heretic
-    bs-manager
-  ];
-
-  programs.obs-studio.plugins = [ pkgs.obs-studio-plugins.obs-vkcapture ];
+  # Montage vidéo (a besoin de la carte NVIDIA)
+  home.packages = [ pkgs.davinci-resolve ];
 }

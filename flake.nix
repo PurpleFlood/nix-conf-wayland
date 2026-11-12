@@ -55,22 +55,18 @@
       };
 
       # Fabrique une machine à partir de son dossier hosts/<nom>.
+      # Toutes les machines chargent les MÊMES modules (modules/default.nix) :
+      # la base est toujours active, le reste s'allume dans hosts/<nom>/configuration.nix
+      # avec `rice.<module>.enable = true;`.
       mkHost =
         host:
-        let
-          leger = host == "r400";
-        in
         nixpkgs.lib.nixosSystem {
           inherit system;
-          specialArgs = { inherit host pkgs-unstable; };
+          specialArgs = { inherit pkgs-unstable; };
           modules = [
             ./hosts/${host}/configuration.nix
-            ./modules/base.nix
-            ./modules/bureau.nix
-            ./modules/theme.nix
-            ./modules/reseau.nix # DNS local + certificat Caddy
-            ./modules/vpn.nix # commande `vpn` (Mullvad / WireGuard)
-            # podman, virt-manager, Flatpak, AppImage
+            ./modules # base + modules optionnels
+            { networking.hostName = nixpkgs.lib.mkDefault host; }
             stylix.nixosModules.stylix
 
             home-manager.nixosModules.home-manager
@@ -78,24 +74,20 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.backupFileExtension = "avant-hm";
-              home-manager.extraSpecialArgs = { inherit host pkgs-unstable; };
+              home-manager.extraSpecialArgs = { inherit pkgs-unstable; };
               home-manager.sharedModules = [
                 niri.homeModules.config # option programs.niri.settings
                 niri.homeModules.stylix # couleurs Stylix appliquées à niri
                 zen-browser.homeModules.beta # option programs.zen-browser
               ];
-              home-manager.users.asap = import ./home/asap.nix;
+              home-manager.users.asap = import ./home/asap.nix; # le rice de base
             }
-          ]
-          ++ nixpkgs.lib.optionals (!leger) [
-            ./modules/i2p.nix # module I2p
-            ./modules/searxng.nix # moteur de recherche local
-            ./modules/musique.nix # Reaper, plugins, audio basse latence
-            ./modules/outils.nix
           ];
         };
     in
     {
+      # Base seule, pour installer n'importe quel PC (voir hosts/minimal).
+      nixosConfigurations.minimal = mkHost "minimal";
       nixosConfigurations.vm = mkHost "vm";
       nixosConfigurations.t470 = mkHost "t470";
       nixosConfigurations.pc = mkHost "pc";

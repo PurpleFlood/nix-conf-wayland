@@ -1,12 +1,7 @@
-# PC FIXE : ce qui est propre à cette machine (matériel, jeux, VR, IA).
-# Le rice commun (niri, waybar…) vient de modules/ et home/ ;
-# les réglages utilisateur propres au PC (écrans, jeux…) sont dans home/pc.nix.
-{
-  config,
-  pkgs,
-  pkgs-unstable,
-  ...
-}:
+# PC FIXE : ce qui est propre à cette machine (matériel) + les modules allumés.
+# Le rice de base vient de modules/base et home/ ;
+# les réglages utilisateur propres au PC (écrans…) sont dans ./home.nix.
+{ config, ... }:
 
 let
   # Pilote Wi-Fi hors noyau pour la clé USB Realtek RTL8852AU.
@@ -18,7 +13,27 @@ in
     ./hardware-configuration.nix
   ];
 
-  networking.hostName = "pc";
+  # ─── Modules et réglages du rice ───────────────────────────────────────
+  rice = {
+    terminal = "ghostty";
+    ecransConnexionEteints = [ "DP-1" ]; # ReGreet seulement sur l'écran HDMI
+
+    applis.enable = true;
+    dev.enable = true;
+    musique.enable = true;
+    gaming.enable = true;
+    vr.enable = true;
+    ia.enable = true;
+    virtualisation.enable = true;
+    zen.enable = true;
+    searxng.enable = true;
+    i2p.enable = true;
+    vpn.enable = true;
+    maison.enable = true;
+  };
+
+  # Écrans, bureaux et réglages utilisateur propres au PC
+  home-manager.users.asap.imports = [ ./home.nix ];
 
   # ─── Démarrage : Limine (thème et fond appliqués par Stylix) ────────────
   boot.loader.limine = {
@@ -28,8 +43,6 @@ in
   };
   boot.loader.efi.canTouchEfiVariables = true;
   boot.tmp.useTmpfs = true;
-
-  hardware.enableRedistributableFirmware = true;
 
   # ─── Wi-Fi : clé USB Realtek (pilote morrownr) ──────────────────────────
   boot.extraModulePackages = [ wifi ];
@@ -60,11 +73,7 @@ in
     options rtw89_usb_git switch_usb_mode=y
   '';
 
-  # NTSYNC : synchronisation façon Windows pour Proton (moins de saccades)
-  boot.kernelModules = [ "ntsync" ];
-
   # ─── NVIDIA RTX 3050 ───────────────────────────────────────────────────
-  hardware.graphics.enable32Bit = true; # jeux 32 bits / Steam / Wine
   services.xserver.videoDrivers = [ "nvidia" ]; # charge le pilote (aussi sous Wayland)
   hardware.nvidia = {
     modesetting.enable = true; # indispensable pour Wayland
@@ -98,85 +107,6 @@ in
         }
       ];
     };
-
-  # ─── Jeux ──────────────────────────────────────────────────────────────
-  programs.steam = {
-    enable = true;
-    protontricks.enable = true;
-    extraPackages = [ pkgs.gamescope ];
-  };
-  programs.gamemode.enable = true;
-  programs.gamescope.enable = true;
-
-  # ─── VR : WiVRn (Quest 3) ──────────────────────────────────────────────
-  # Version 26.9 (recette d'unstable) compilée avec les bibliothèques du système,
-  # pour que les jeux puissent la charger (problème de glibc sinon).
-  services.wivrn = {
-    enable = true;
-    package = pkgs.callPackage "${pkgs-unstable.path}/pkgs/by-name/wi/wivrn/package.nix" { };
-    openFirewall = true;
-    autoStart = true;
-    highPriority = true;
-    steam.importOXRRuntimes = true;
-    # Couche OpenVR → OpenXR que WiVRn active à la connexion du casque
-    config = {
-      enable = true;
-      json.openvr-compat-path = "${pkgs.xrizer}/lib/xrizer";
-    };
-  };
-
-  # ─── IA locale : Ollama (Vulkan, pas de compilation CUDA) ──────────────
-  services.ollama = {
-    enable = true;
-    package = pkgs.ollama-vulkan;
-  };
-
-  # ─── Paquets propres au PC ─────────────────────────────────────────────
-  environment.systemPackages = with pkgs; [
-    pkgs-unstable.android-tools # adb, même version que celui de WiVRn
-    vrc-get
-    unityhub
-    # ALCOM (gestion des projets VRChat), avec un correctif d'affichage
-    (symlinkJoin {
-      name = "alcom";
-      paths = [ alcom ];
-      nativeBuildInputs = [ makeWrapper ];
-      postBuild = ''
-        wrapProgram $out/bin/ALCOM --set WEBKIT_DISABLE_DMABUF_RENDERER 1
-      '';
-    })
-  ];
-
-  # Accès SSH (dépannage depuis le portable).
-  services.openssh.enable = true;
-
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 14d";
-  };
-
-  # AnythingLLM (interface web sur http://localhost:3001), en conteneur podman
-  virtualisation.oci-containers = {
-    backend = "podman";
-    containers.anythingllm = {
-      image = "docker.io/mintplexlabs/anythingllm:latest";
-      volumes = [
-        "/var/lib/anythingllm:/app/server/storage"
-        "/var/lib/anythingllm/.env:/app/server/.env" # réglages du serveur
-      ];
-      environment.STORAGE_DIR = "/app/server/storage";
-      extraOptions = [
-        "--network=host" # joint LM Studio (1234) et Ollama (11434) en localhost
-        "--cap-add=SYS_ADMIN" # requis par le navigateur intégré (lecture de pages web)
-      ];
-    };
-  };
-  # Dossier des données + fichier .env vide, propriété de l'utilisateur de l'image
-  systemd.tmpfiles.rules = [
-    "d /var/lib/anythingllm 0755 1000 1000 -"
-    "f /var/lib/anythingllm/.env 0644 1000 1000 -"
-  ];
 
   # Version de la PREMIÈRE installation du PC : ne pas changer.
   system.stateVersion = "26.05";

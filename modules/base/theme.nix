@@ -1,5 +1,5 @@
 # THÈME GLOBAL : Stylix tire une palette du fond d'écran et l'applique partout
-# (niri, waybar, Ghostty, mako, GTK, Qt, ReGreet, yazi, zathura…).
+# (niri, waybar, foot/Ghostty, mako, GTK, Qt, ReGreet, yazi, zathura…).
 #
 # Pour changer de fond : remplace wallpapers/fond.jpg (ou change le chemin
 # ci-dessous), puis rebuild — toutes les couleurs suivent.
@@ -8,7 +8,7 @@
 {
   stylix = {
     enable = true;
-    image = ../wallpapers/wallhaven-r7gzzm.jpg;
+    image = ../../wallpapers/wallhaven-r7gzzm.jpg;
     polarity = "dark"; # palette sombre
 
     cursor = {

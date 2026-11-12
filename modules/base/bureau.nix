@@ -1,10 +1,9 @@
-# BUREAU (côté système) : niri, écran de connexion, verrouillage, fichiers.
+# BUREAU (côté système, partie de la base) : niri, écran de connexion, verrouillage, fichiers.
 # Tout ce qui demande les droits root ou un service système.
 {
   config,
   lib,
   pkgs,
-  host,
   ...
 }:
 
@@ -14,11 +13,11 @@ let
   # ── Écran de connexion : ReGreet lancé dans un mini-niri ──────────────
   # (au lieu de cage, qui étale la fenêtre sur tous les écrans et ignore
   # la disposition du clavier).
-  clavier = if host == "t470" then "us" else "fr";
+  clavier = config.rice.clavier;
 
   # Écrans éteints pendant la connexion : ReGreet n'apparaît que sur l'écran
   # principal. La session niri rallume ensuite tous les écrans.
-  ecransEteints = { pc = [ "DP-1" ]; }.${host} or [ ];
+  ecransEteints = config.rice.ecransConnexionEteints;
 
   niriConnexion = pkgs.writeText "niri-connexion.kdl" ''
     input {

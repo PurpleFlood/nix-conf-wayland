@@ -1,17 +1,14 @@
 # WAYBAR : la barre. Lancée automatiquement avec la session (systemd).
-# Couleurs : Stylix. Les clics ouvrent les outils en terminal (Ghostty).
+# Couleurs : Stylix. Les clics ouvrent les outils dans le terminal du rice.
 {
+  osConfig,
   lib,
   pkgs,
-  host,
   ...
 }:
 
 let
-
-  terminal = if host == "r400" then "foot" else "ghostty";
-
-  tui = cmd: "${terminal} -e ${cmd}"; # ouvre un outil en terminal
+  tui = cmd: "${osConfig.rice.lancerDansTerminal} ${cmd}"; # ouvre un outil en terminal
 
   # État du VPN Mullvad (bouton masqué si aucun pays n'est configuré).
   vpnEtat = pkgs.writeShellScriptBin "vpn-etat" ''
@@ -55,7 +52,10 @@ in
         "wireplumber"
         "bluetooth"
         "network"
-        "custom/vpn"
+      ]
+      # Bouton VPN seulement si le module vpn est actif.
+      ++ lib.optional osConfig.rice.vpn.enable "custom/vpn"
+      ++ [
         "power-profiles-daemon"
         "battery"
         "custom/extinction"

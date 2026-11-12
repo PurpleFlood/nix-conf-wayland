@@ -7,7 +7,9 @@
 #
 # Les réglages faits dans la console (port, débit…) sont gardés dans
 # /var/lib/i2p : ils survivent aux rebuilds, mais pas à une réinstallation.
-{ ... }:
+#
+#   rice.i2p.enable = true;
+{ config, lib, ... }:
 
 let
   # Port pour les autres routeurs I2P. À recopier dans la console :
@@ -15,10 +17,14 @@ let
   portI2p = 18234;
 in
 {
-  services.i2p.enable = true;
+  options.rice.i2p.enable = lib.mkEnableOption "le réseau anonyme I2P";
 
-  networking.firewall = {
-    allowedTCPPorts = [ portI2p ];
-    allowedUDPPorts = [ portI2p ];
+  config = lib.mkIf config.rice.i2p.enable {
+    services.i2p.enable = true;
+
+    networking.firewall = {
+      allowedTCPPorts = [ portI2p ];
+      allowedUDPPorts = [ portI2p ];
+    };
   };
 }

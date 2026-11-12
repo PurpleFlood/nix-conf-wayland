@@ -1,0 +1,3 @@
+# Disque de la machine virtuelle de test (nix run .#vm)
+rice-vm.qcow2
+result
