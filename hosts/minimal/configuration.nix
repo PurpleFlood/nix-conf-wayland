@@ -11,7 +11,7 @@
 #     nixos-install --flake .#minimal --impure
 #
 # Rebuild sur la machine installée :
-#   sudo nixos-rebuild switch --flake .#minimal --impure
+#   nixos-rebuild switch --flake .#minimal --impure --sudo
 #
 # En BIOS (vieux PC), GRUB s'installe sur /dev/sda ; pour un autre disque :
 #   RICE_DISK=/dev/nvme0n1 … (même commande)
