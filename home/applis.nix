@@ -3,6 +3,7 @@
   lib,
   pkgs,
   pkgs-unstable,
+  host,
   ...
 }:
 
@@ -121,6 +122,7 @@ in
     libreoffice
     nextcloud-client
     filezilla
+    bitwig
 
     # ─── Dev ─────────────────────────────────────────────────────────────
     # (gcc et nodejs sont dans home/neovim.nix)
@@ -133,10 +135,11 @@ in
     dotnet-sdk
     ghidra
     podman-compose
-    claude-code
-    opencode
-    bitwig
-  ];
+   ]
+    ++ lib.optional (host != "r400") [
+      claude-code
+      opencode
+    ];
 
   xdg.desktopEntries.bitwig = {
     name = "Bitwig Studio";

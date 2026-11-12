@@ -121,10 +121,14 @@ in
 
     binds = raccourcisBureaux // {
       # ── Applis ─────────────────────────────────────────────────────
-      "Mod+Return".action.spawn = [
-        terminal
-        "+new-window"
-      ];
+      "Mod+Return".action.spawn =
+        if host == "r400" then
+          [ "foot" ]
+        else
+          [
+            "ghostty"
+            "+new-window"
+          ];
       "Mod+D".action.spawn = "anyrun";
       "Mod+E".action.spawn = [
         terminal
