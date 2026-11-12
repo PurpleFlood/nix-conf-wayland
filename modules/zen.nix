@@ -38,7 +38,7 @@ in
 
         policies = common.policies;
 
-        profiles.asap = {
+        profiles.${config.rice.user} = {
           id = 0;
           isDefault = true;
           search = common.search;

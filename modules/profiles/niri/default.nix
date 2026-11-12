@@ -56,7 +56,7 @@ in
       home-manager.users.${config.rice.user}.imports = [
         hmInputs.niri.config # option programs.niri.settings (niri-flake)
         hmInputs.niri.stylix # couleurs Stylix appliquées à niri
-        ../../../home/asap.nix
+        ../../../home
       ];
     })
   ];

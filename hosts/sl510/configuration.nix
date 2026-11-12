@@ -7,7 +7,7 @@
 #     nixos-install --flake .#sl510 --impure
 # Puis copier /etc/nixos/hardware-configuration.nix dans ce dossier et le
 # commiter : les rebuilds suivants n'ont plus besoin de --impure.
-{ ... }:
+{ private, ... }:
 
 {
   # Config matérielle : ./hardware-configuration.nix une fois copiée
@@ -17,7 +17,7 @@
   # ─── Profil et modules ─────────────────────────────────────────────────
   rice = {
     profile = "simple";
-    user = "marie"; # ← son prénom (compte sans sudo)
+    user = private.hostUsers.sl510 or "invite"; # son compte (sans sudo), nommé dans le dépôt privé
     simple.desktop = "cinnamon"; # "xfce" si la machine reste lente
 
     tailscale.enable = true; # pour le dépanner où qu'il soit

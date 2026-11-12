@@ -6,7 +6,12 @@
 #   rice.keyboard = "us";
 #
 # Côté home-manager, on les lit avec `osConfig.rice.…`.
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  private,
+  ...
+}:
 
 {
   options.rice = {
@@ -25,10 +30,12 @@
 
     admin = lib.mkOption {
       type = lib.types.str;
-      default = "asap";
+      default = private.admin;
+      defaultText = lib.literalExpression "private.admin";
       description = ''
         Compte administrateur, présent sur TOUTES les machines (sudo, SSH avec
         tes clés) : c'est par lui que tu dépannes et mets à jour à distance.
+        Son nom vient du dépôt privé : chacun choisit le sien.
       '';
     };
 

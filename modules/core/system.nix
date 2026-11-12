@@ -70,7 +70,7 @@ in
     wifi.backend = "iwd";
   };
 
-  # Chaque machine s'annonce sur le réseau local : ssh asap@<machine>.local
+  # Chaque machine s'annonce sur le réseau local : ssh <admin>@<machine>.local
   services.avahi = {
     enable = true;
     nssmdns4 = true; # le système sait résoudre les noms en .local

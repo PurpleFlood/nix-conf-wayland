@@ -1,6 +1,6 @@
 # FIREFOX : les réglages viennent de browser-common.nix (partagés avec Zen).
 # Tes DONNÉES (marque-pages, historique) passent par Firefox Sync.
-{ osConfig, ... }:
+{ config, osConfig, ... }:
 
 let
   common = import ./browser-common.nix { searxng = osConfig.rice.searxng.enable; };
@@ -10,7 +10,8 @@ in
     enable = true;
     policies = common.policies;
 
-    profiles.asap = {
+    # Profil au nom de l'utilisateur (son dossier dans ~/.mozilla/firefox)
+    profiles.${config.home.username} = {
       id = 0;
       isDefault = true;
       search = common.search;

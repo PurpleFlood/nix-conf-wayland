@@ -9,7 +9,19 @@
 # Pour ton propre dépôt privé : copie ce dossier dans un nouveau dépôt GitHub
 # privé, remplace les valeurs, et ajoute tes fichiers (certificat, favoris).
 {
-  # Identité git (home/asap.nix)
+  # Ton compte administrateur sur toutes les machines (sudo, SSH avec sshKeys).
+  admin = "user";
+
+  # Ton dépôt public (pour les mises à jour automatiques du profil simple).
+  repository = "github:ton-pseudo/nix-conf-wayland";
+
+  # Comptes des personnes à qui tu prépares une machine (profil simple),
+  # par nom de machine. Leurs prénoms restent ainsi hors du dépôt public.
+  hostUsers = {
+    sl510 = "invite";
+  };
+
+  # Identité git (home/default.nix)
   git = {
     name = "Exemple";
     email = "exemple@example.com";
@@ -31,5 +43,5 @@
 
   # Fichier de favoris de Zen (module zen) : dans ton clone du dépôt privé,
   # pour qu'il soit modifiable (Zen l'écrit à la fermeture).
-  bookmarksFile = "/home/asap/git/nix-private/bookmarks.html";
+  bookmarksFile = "/home/user/git/nix-private/bookmarks.html";
 }

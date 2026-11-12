@@ -33,8 +33,11 @@
       inputs.nixpkgs-stable.follows = "nixpkgs";
     };
 
-    # Tes données personnelles (IP du homelab, certificat, e-mail, favoris…),
-    # dans un dépôt PRIVÉ : seul toi peux le récupérer (clé SSH GitHub).
+    # Tes données personnelles (nom du compte admin, IP du homelab, certificat,
+    # e-mail, favoris…), dans un dépôt PRIVÉ : seul toi peux le récupérer (clé SSH).
+    # Si tu reprends cette config : remplace l'adresse par celle de ton propre
+    # dépôt privé (copie de private-example/), ou par un dossier local :
+    #   url = "path:/home/<toi>/nix-private";
     # Sans accès, utiliser l'exemple fourni :
     #   nixos-rebuild build --flake .#<machine> --override-input private path:./private-example
     private = {

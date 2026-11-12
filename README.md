@@ -13,6 +13,18 @@ avec les fausses valeurs de `private-example/` :
 nixos-rebuild build --flake .#minimal --impure --override-input private path:./private-example
 ```
 
+### Reprendre cette config pour soi
+
+Rien de personnel n'est écrit en dur : le nom du compte admin, le dépôt à suivre, l'e-mail git,
+les clés SSH et les adresses du réseau viennent du dépôt privé.
+
+1. Copier `private-example/` dans un dépôt privé à soi (ou un simple dossier), y mettre ses valeurs
+   (`admin = "ton-pseudo";`…).
+2. Dans `flake.nix`, remplacer l'adresse de l'entrée `private` par ce dépôt
+   (ou `path:/home/<toi>/nix-private` pour un dossier local), puis `nix flake lock`.
+3. Créer sa machine dans `hosts/<nom>/` (le nom du dossier devient le hostname) en partant de
+   `hosts/minimal/` ou `hosts/sl510/`, et l'ajouter dans `flake.nix`.
+
 ## Machines
 
 | Machine | Commande | Profil et modules |
@@ -28,7 +40,7 @@ nixos-rebuild build --flake .#minimal --impure --override-input private path:./p
 pour lire le dépôt privé ; seule l'activation passe par sudo.
 
 Rebuild d'une autre machine depuis le PC (elle doit être allumée, SSH actif) :
-`nixos-rebuild switch --flake .#r400 --target-host asap@<ip> --sudo --ask-sudo-password`
+`nixos-rebuild switch --flake .#r400 --target-host <admin>@<ip> --sudo --ask-sudo-password`
 
 Après un premier changement de config sur une machine, préférer
 `nixos-rebuild boot --flake .#<machine> --sudo` puis redémarrer : en cas de souci,
@@ -76,7 +88,7 @@ Et autour :
 | Chemin | Rôle |
 |---|---|
 | `flake.nix` | sources (nixpkgs, unstable, home-manager, Stylix, niri-flake, Zen, dépôt privé) et liste des machines |
-| `home/` | le rice côté utilisateur (profil niri) : niri, waybar, anyrun, foot/Ghostty, fish, Neovim, Firefox |
+| `home/` | le rice côté utilisateur (profil niri, `home/default.nix`) : niri, waybar, anyrun, foot/Ghostty, fish, Neovim, Firefox |
 | `hosts/<machine>/` | **propre à une machine** : disques, démarrage, matériel, profil et modules (+ `home.nix` si besoin) |
 | `hosts/hardware.nix` | trouve la config matérielle d'une machine pas encore dans le dépôt (installation) |
 | `private-example/` | forme du dépôt privé, avec de fausses valeurs |
@@ -119,7 +131,7 @@ copier un module existant, changer son nom, l'ajouter à `modules/default.nix`.
 ### Installer une nouvelle machine
 
 1. Depuis la clé live : partitionner, monter sur `/mnt`, `nixos-generate-config --root /mnt`,
-   cloner le dépôt dans `/mnt/home/asap/git/nix-conf-wayland`, puis :
+   cloner le dépôt dans `/mnt/home/<admin>/git/nix-conf-wayland`, puis :
    `RICE_HARDWARE=/mnt/etc/nixos/hardware-configuration.nix nixos-install --flake .#minimal --impure`
    (BIOS : GRUB sur `/dev/sda`, ou `RICE_DISK=/dev/…` ; UEFI : systemd-boot, détecté tout seul).
    La clé live doit pouvoir lire le dépôt privé (clé SSH GitHub), sinon ajouter
@@ -131,11 +143,11 @@ copier un module existant, changer son nom, l'ajouter à `modules/default.nix`.
 
 ### Une machine pour un proche (profil simple)
 
-- Son compte (`rice.user`) n'a pas sudo ; le compte admin (`asap`, tes clés SSH) est caché de l'écran de connexion.
+- Son compte (`rice.user`, nommé dans `private.hostUsers`) n'a pas sudo ; le compte admin (`private.admin`, tes clés SSH) est caché de l'écran de connexion.
 - Chaque nuit, elle récupère la config sur GitHub et l'applique au redémarrage suivant.
   Pour lire le dépôt privé, `root` a besoin d'une clé de déploiement GitHub en lecture seule
   (`/root/.ssh/id_ed25519`, ajoutée dans les réglages du dépôt privé → Deploy keys).
-- Dépannage : `sudo tailscale up` une fois, puis `ssh asap@<machine>` d'où que tu sois.
+- Dépannage : `sudo tailscale up` une fois, puis `ssh <admin>@<machine>` d'où que tu sois.
 
 ## Raccourcis (Super = touche Windows)
 

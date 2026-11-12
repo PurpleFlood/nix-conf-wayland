@@ -10,6 +10,7 @@
   config,
   lib,
   pkgs,
+  private,
   ...
 }:
 
@@ -37,7 +38,7 @@ in
       type = lib.types.bool;
       default = true;
       description = ''
-        Mise à jour automatique chaque nuit depuis ton dépôt GitHub : tu fais
+        Mise à jour automatique chaque nuit depuis ton dépôt GitHub (private.repository) : tu fais
         `git push` chez toi, la machine suit. Appliquée au redémarrage suivant.
       '';
     };
@@ -82,7 +83,7 @@ in
         # Mises à jour automatiques depuis ton dépôt
         system.autoUpgrade = lib.mkIf cfg.autoUpgrade {
           enable = true;
-          flake = "github:PurpleFlood/nix-conf-wayland#${config.networking.hostName}";
+          flake = "${private.repository}#${config.networking.hostName}"; # ton dépôt (dépôt privé)
           operation = "boot"; # appliquée au prochain démarrage, jamais en pleine session
           dates = "03:30";
           randomizedDelaySec = "45min";

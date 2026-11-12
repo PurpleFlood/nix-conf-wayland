@@ -3,7 +3,7 @@
 # Se lance depuis la racine du dépôt avec :   nix run .#vm
 # Rien à installer : NixOS construit la VM et l'ouvre dans une fenêtre QEMU.
 # Le disque de la VM est le fichier ./rice-vm.qcow2 (supprime-le pour repartir de zéro).
-{ lib, ... }:
+{ config, lib, ... }:
 
 {
   networking.hostName = "rice-vm";
@@ -14,7 +14,7 @@
   # ─── Réglages de la VM (appliqués seulement par `nix run .#vm`) ───────────
   virtualisation.vmVariant = {
     systemd.services.greetd.environment.WLR_RENDERER = "pixman";
-    # Accès SSH depuis ton PC : ssh -p 2222 asap@localhost
+    # Accès SSH depuis ton PC : ssh -p 2222 <admin>@localhost
     services.openssh.enable = true;
     virtualisation.forwardPorts = [
       {
@@ -27,7 +27,7 @@
     programs.regreet.enable = lib.mkForce false;
     services.greetd.settings.default_session = {
       command = "niri-session";
-      user = "asap";
+      user = config.rice.admin;
     };
     virtualisation = {
       memorySize = 8192; # Mo de RAM
