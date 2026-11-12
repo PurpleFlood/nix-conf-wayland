@@ -204,6 +204,6 @@ copier un module existant, changer son nom, l'ajouter à `modules/default.nix`.
 
 ```
 sudo nix-collect-garbage --delete-older-than 7d
-sudo nixos-rebuild boot --flake .#<machine>
+nixos-rebuild boot --flake .#<machine> --sudo
 ```
 Le ménage automatique (`nix.gc`) supprime aussi chaque semaine les générations de plus de 14 jours.
