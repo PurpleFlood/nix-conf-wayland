@@ -7,36 +7,36 @@
 #   - le type de démarrage (UEFI ou BIOS), détecté tout seul.
 #
 # Installation depuis la clé live (dans le dépôt cloné) :
-#   RICE_MATERIEL=/mnt/etc/nixos/hardware-configuration.nix \
+#   RICE_HARDWARE=/mnt/etc/nixos/hardware-configuration.nix \
 #     nixos-install --flake .#minimal --impure
 #
 # Rebuild sur la machine installée :
 #   sudo nixos-rebuild switch --flake .#minimal --impure
 #
-# En BIOS (vieux PC), GRUB s'installe sur /dev/sda ; pour un autre disque :
-#   RICE_DISQUE=/dev/nvme0n1 … (même commande)
+# En BIOS (vieux PC), GRUB s'installe sur /dev/sda ; pour un autre disk :
+#   RICE_DISK=/dev/nvme0n1 … (même commande)
 { ... }:
 
 let
   # Chemin de la config matérielle : /etc/nixos sur la machine installée,
-  # /mnt/etc/nixos pendant l'installation (variable RICE_MATERIEL).
-  materiel =
+  # /mnt/etc/nixos pendant l'installation (variable RICE_HARDWARE).
+  hardwareConfig =
     let
-      chemin = builtins.getEnv "RICE_MATERIEL";
+      path = builtins.getEnv "RICE_HARDWARE";
     in
-    if chemin != "" then /. + chemin else /etc/nixos/hardware-configuration.nix;
+    if path != "" then /. + path else /etc/nixos/hardware-configuration.nix;
 
   # Démarrage UEFI si le firmware l'expose, sinon BIOS classique.
   uefi = builtins.pathExists /sys/firmware/efi;
 
-  disque =
+  disk =
     let
-      d = builtins.getEnv "RICE_DISQUE";
+      d = builtins.getEnv "RICE_DISK";
     in
     if d != "" then d else "/dev/sda";
 in
 {
-  imports = [ materiel ];
+  imports = [ hardwareConfig ];
 
   # UEFI : systemd-boot (le plus simple, marche partout)
   boot.loader.systemd-boot = {
@@ -45,10 +45,10 @@ in
   };
   boot.loader.efi.canTouchEfiVariables = uefi;
 
-  # BIOS : GRUB sur le disque entier
+  # BIOS : GRUB sur le disk entier
   boot.loader.grub = {
     enable = !uefi;
-    device = disque;
+    device = disk;
     configurationLimit = 10;
   };
 

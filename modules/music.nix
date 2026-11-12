@@ -1,6 +1,6 @@
 # MUSIQUE : DAW, synthés, plugins et réglages audio basse latence.
 #
-#   rice.musique.enable = true;
+#   rice.music.enable = true;
 #
 # Les plugins installés ici sont rangés dans /run/current-system/sw/lib/ :
 #   vst3/  clap/  lv2/  vst/
@@ -36,9 +36,9 @@ let
     exec ${pkgs.steam-run}/bin/steam-run "$HOME/Soft/bitwig-studio/bitwig-studio" "$@"
   '';
 
-  raccourciAudio = nom: commande: {
-    name = nom;
-    exec = commande;
+  audioDesktopEntry = name: command: {
+    inherit name;
+    exec = command;
     icon = "audio-x-generic";
     categories = [
       "Audio"
@@ -47,9 +47,9 @@ let
   };
 in
 {
-  options.rice.musique.enable = lib.mkEnableOption "la musique (DAW, plugins, basse latence)";
+  options.rice.music.enable = lib.mkEnableOption "la musique (DAW, plugins, basse latence)";
 
-  config = lib.mkIf config.rice.musique.enable {
+  config = lib.mkIf config.rice.music.enable {
     # ─── Son : PipeWire en mode « studio » ─────────────────────────────────
     # JACK via PipeWire : Reaper, Cardinal et VCV Rack peuvent parler JACK,
     # tout en gardant le son du bureau (Firefox, Discord…) en même temps.
@@ -57,7 +57,7 @@ in
 
     # Latence basse : 256 échantillons à 48 kHz ≈ 5 ms.
     # Si ça craque (xruns), monte à 512. Pour enregistrer une guitare, descends à 128.
-    services.pipewire.extraConfig.pipewire."92-latence-basse" = {
+    services.pipewire.extraConfig.pipewire."92-low-latency" = {
       "context.properties" = {
         "default.clock.rate" = 48000;
         "default.clock.allowed-rates" = [
@@ -115,8 +115,8 @@ in
 
       # Raccourcis du lanceur (les paquets n'en fournissent pas)
       xdg.desktopEntries = {
-        bitwig = raccourciAudio "Bitwig Studio" "bitwig";
-        cardinal = raccourciAudio "Cardinal" "Cardinal" // {
+        bitwig = audioDesktopEntry "Bitwig Studio" "bitwig";
+        cardinal = audioDesktopEntry "Cardinal" "Cardinal" // {
           comment = "Rack modulaire (VCV Rack libre)";
         };
       };

@@ -17,8 +17,8 @@ let
     };
   };
 
-  rechercheNix = type: alias: nom: {
-    name = nom;
+  nixSearch = type: alias: name: {
+    inherit name;
     urls = [
       {
         template = "https://search.nixos.org/${type}";
@@ -83,8 +83,8 @@ in
         definedAliases = [ "@s" ];
       };
       # « @np firefox » cherche un paquet, « @no steam » une option NixOS.
-      nix-packages = rechercheNix "packages" "@np" "Paquets Nix";
-      nix-options = rechercheNix "options" "@no" "Options NixOS";
+      nix-packages = nixSearch "packages" "@np" "Paquets Nix";
+      nix-options = nixSearch "options" "@no" "Options NixOS";
       # Moteurs inutiles masqués.
       bing.metaData.hidden = true;
       ebay.metaData.hidden = true;

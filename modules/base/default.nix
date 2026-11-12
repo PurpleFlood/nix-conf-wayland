@@ -7,8 +7,8 @@
 {
   imports = [
     ./options.nix # les réglages par machine : clavier, terminal, écrans
-    ./systeme.nix # Nix, langue, utilisateur, réseau, son, matériel
-    ./bureau.nix # niri, écran de connexion, verrouillage, fichiers
+    ./system.nix # Nix, langue, utilisateur, réseau, son, matériel
+    ./desktop.nix # niri, écran de connexion, verrouillage, fichiers
     ./theme.nix # Stylix
   ];
 }

@@ -1,18 +1,18 @@
 # ZEN : navigateur basé sur Firefox, avec les mêmes extensions, moteurs et
-# réglages (home/navigateurs/navigateur-commun.nix) + favoris synchronisés
+# réglages (home/browsers/browser-common.nix) + favoris synchronisés
 # avec le dépôt. Se lance avec `zen-beta`.
 #
 #   rice.zen.enable = true;
 { config, lib, ... }:
 
 let
-  commun = import ../home/navigateurs/navigateur-commun.nix {
+  common = import ../home/browsers/browser-common.nix {
     searxng = config.rice.searxng.enable;
   };
 
   # Favoris partagés : exportés à la fermeture, réimportés au démarrage.
-  favoris = {
-    "browser.bookmarks.file" = "/home/asap/git/nix-conf-wayland/dotfiles/favoris.html";
+  bookmarks = {
+    "browser.bookmarks.file" = "/home/asap/git/nix-conf-wayland/dotfiles/bookmarks.html";
     "browser.bookmarks.autoExportHTML" = true; # fermeture → écrit le fichier
     "browser.places.importBookmarksHTML" = true; # démarrage → relit le fichier
   };
@@ -27,15 +27,15 @@ in
         # Mets `true` si tu veux que Zen ouvre les liens à la place de Firefox.
         setAsDefaultBrowser = false;
 
-        policies = commun.policies;
+        policies = common.policies;
 
         profiles.asap = {
           id = 0;
           isDefault = true;
-          search = commun.search;
+          search = common.search;
           settings =
-            commun.settings
-            // favoris
+            common.settings
+            // bookmarks
             // {
               "zen.welcome-screen.seen" = true; # saute l'écran d'accueil
               "ui.systemUsesDarkTheme" = 1; # interface en sombre

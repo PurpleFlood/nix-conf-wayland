@@ -8,10 +8,10 @@
 }:
 
 let
-  tui = cmd: "${osConfig.rice.lancerDansTerminal} ${cmd}"; # ouvre un outil en terminal
+  tui = cmd: "${osConfig.rice.terminalExec} ${cmd}"; # ouvre un outil en terminal
 
   # État du VPN Mullvad (bouton masqué si aucun pays n'est configuré).
-  vpnEtat = pkgs.writeShellScriptBin "vpn-etat" ''
+  vpnStatus = pkgs.writeShellScriptBin "vpn-status" ''
     export PATH=${
       lib.makeBinPath (
         with pkgs;
@@ -24,7 +24,7 @@ let
         ]
       )
     }:/run/wrappers/bin:$PATH
-    ${builtins.readFile ./scripts/vpn-etat.sh}
+    ${builtins.readFile ./scripts/vpn-status.sh}
   '';
 
 in
@@ -33,7 +33,7 @@ in
     enable = true;
     systemd.enable = true;
 
-    settings.barre = {
+    settings.main = {
       layer = "top";
       position = "top";
       height = 30;
@@ -58,7 +58,7 @@ in
       ++ [
         "power-profiles-daemon"
         "battery"
-        "custom/extinction"
+        "custom/power"
       ];
 
       # Numéro du bureau sur son écran (1, 2, 3…) plutôt que son nom (6, 7, 8)
@@ -99,7 +99,7 @@ in
       };
 
       "custom/vpn" = {
-        exec = "${vpnEtat}/bin/vpn-etat";
+        exec = "${vpnStatus}/bin/vpn-status";
         return-type = "json";
         interval = 15;
         signal = 8; # rafraîchi tout de suite par vpn-menu
@@ -132,10 +132,10 @@ in
         };
       };
 
-      "custom/extinction" = {
+      "custom/power" = {
         format = "⏻";
         tooltip = false;
-        on-click = "menu-extinction";
+        on-click = "power-menu";
       };
     };
     style = ''
@@ -148,23 +148,23 @@ in
       	.modules-right {
       	  margin-right: 16px;
       	}
-      	#custom-extinction {
+      	#custom-power {
       	  padding: 0 10px 0 6px;
       	}
       	      /* Boutons : coins arrondis et transition douce */
               #workspaces button, #clock, #wireplumber, #bluetooth, #network,
-              #power-profiles-daemon, #battery, #custom-extinction, #custom-vpn.actif {
+              #power-profiles-daemon, #battery, #custom-power, #custom-vpn.active {
                 border-radius: 8px;
                 transition: background-color 0.2s ease, color 0.2s ease;
               }
               /* Survol : léger fond aux couleurs de la palette */
               #workspaces button:hover, #clock:hover, #wireplumber:hover,
               #bluetooth:hover, #network:hover, #power-profiles-daemon:hover,
-              #battery:hover, #custom-vpn.actif:hover {
+              #battery:hover, #custom-vpn.active:hover {
                 background-color: alpha(@base0E, 0.25);
               }
               /* Le bouton d'extinction vire au rouge au survol */
-              #custom-extinction:hover {
+              #custom-power:hover {
                 background-color: alpha(@base08, 0.25);
                 color: @base08;
               }

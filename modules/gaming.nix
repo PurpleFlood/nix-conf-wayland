@@ -1,15 +1,15 @@
 # JEUX : Steam (Proton, gamescope), Heroic, Lutris, Prism Launcher, MangoHud.
-# Les configs modifiables (MangoHud, Heroic, Prism) sont dans dotfiles/jeux/.
+# Les configs modifiables (MangoHud, Heroic, Prism) sont dans dotfiles/games/.
 #
 #   rice.gaming.enable = true;
 { config, lib, pkgs, ... }:
 
 let
   # Lien direct vers un fichier du dépôt : modifiable sans rebuild.
-  lien =
-    chemin:
-    pkgs.runCommandLocal (baseNameOf chemin) { } ''
-      ln -s ${lib.escapeShellArg "/home/asap/git/nix-conf-wayland/dotfiles/jeux/${chemin}"} $out
+  link =
+    path:
+    pkgs.runCommandLocal (baseNameOf path) { } ''
+      ln -s ${lib.escapeShellArg "/home/asap/git/nix-conf-wayland/dotfiles/games/${path}"} $out
     '';
 
   # Prism Launcher + chargeur OpenXR si la VR est active (Vivecraft → WiVRn).
@@ -39,10 +39,10 @@ in
     # ─── Côté utilisateur ─────────────────────────────────────────────────
     home-manager.users.asap = {
       xdg.configFile = {
-        "heroic/config.json".source = lien "heroic-config.json";
-        "MangoHud".source = lien "MangoHud";
+        "heroic/config.json".source = link "heroic-config.json";
+        "MangoHud".source = link "MangoHud";
       };
-      home.file.".local/share/PrismLauncher/prismlauncher.cfg".source = lien "prismlauncher.cfg";
+      home.file.".local/share/PrismLauncher/prismlauncher.cfg".source = link "prismlauncher.cfg";
 
       # Overlay MangoHud dans tous les jeux (Maj droite + F12 pour l'afficher)
       home.sessionVariables.MANGOHUD = "1";

@@ -1,7 +1,7 @@
 # VPN Mullvad (WireGuard) : ta commande `vpn` d'avant, inchangée.
 #   vpn <pays> | off | status | list
 # Les fichiers .conf restent dans /etc/wireguard/<pays>/ (hors dépôt : ce sont des secrets).
-# Le bouton de waybar (home/bureau/waybar.nix) l'utilise sans mot de passe.
+# Le bouton de waybar (home/desktop/waybar.nix) l'utilise sans mot de passe.
 #
 #   rice.vpn.enable = true;
 {

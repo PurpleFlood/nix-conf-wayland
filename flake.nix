@@ -73,7 +73,7 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.backupFileExtension = "avant-hm";
+              home-manager.backupFileExtension = "hm-backup";
               home-manager.extraSpecialArgs = { inherit pkgs-unstable; };
               home-manager.sharedModules = [
                 niri.homeModules.config # option programs.niri.settings

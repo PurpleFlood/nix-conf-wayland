@@ -1,20 +1,20 @@
-# FIREFOX : les réglages viennent de navigateur-commun.nix (partagés avec Zen).
+# FIREFOX : les réglages viennent de browser-common.nix (partagés avec Zen).
 # Tes DONNÉES (marque-pages, historique) passent par Firefox Sync.
 { osConfig, ... }:
 
 let
-  commun = import ./navigateur-commun.nix { searxng = osConfig.rice.searxng.enable; };
+  common = import ./browser-common.nix { searxng = osConfig.rice.searxng.enable; };
 in
 {
   programs.firefox = {
     enable = true;
-    policies = commun.policies;
+    policies = common.policies;
 
     profiles.asap = {
       id = 0;
       isDefault = true;
-      search = commun.search;
-      settings = commun.settings;
+      search = common.search;
+      settings = common.settings;
     };
   };
 

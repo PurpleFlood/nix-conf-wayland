@@ -1,7 +1,7 @@
 # APPLIS GÉNÉRALISTES : communication, bureautique, création, médias…
 # + lancer des applis d'ailleurs (Flatpak, AppImage, Bottles).
 #
-#   rice.applis.enable = true;
+#   rice.apps.enable = true;
 {
   config,
   lib,
@@ -21,9 +21,9 @@ let
   };
 in
 {
-  options.rice.applis.enable = lib.mkEnableOption "les applis généralistes";
+  options.rice.apps.enable = lib.mkEnableOption "les applis généralistes";
 
-  config = lib.mkIf config.rice.applis.enable {
+  config = lib.mkIf config.rice.apps.enable {
     # ─── Applis d'ailleurs ────────────────────────────────────────────────
     services.flatpak.enable = true;
 

@@ -16,20 +16,20 @@ in
   # ─── Modules et réglages du rice ───────────────────────────────────────
   rice = {
     terminal = "ghostty";
-    ecransConnexionEteints = [ "DP-1" ]; # ReGreet seulement sur l'écran HDMI
+    greeterDisabledOutputs = [ "DP-1" ]; # ReGreet seulement sur l'écran HDMI
 
-    applis.enable = true;
+    apps.enable = true;
     dev.enable = true;
-    musique.enable = true;
+    music.enable = true;
     gaming.enable = true;
     vr.enable = true;
-    ia.enable = true;
+    ai.enable = true;
     virtualisation.enable = true;
     zen.enable = true;
     searxng.enable = true;
     i2p.enable = true;
     vpn.enable = true;
-    maison.enable = true;
+    homeNetwork.enable = true;
   };
 
   # Écrans, bureaux et réglages utilisateur propres au PC

@@ -10,18 +10,18 @@
 
   # ─── Modules et réglages du rice ───────────────────────────────────────
   rice = {
-    clavier = "us"; # clavier physique en QWERTY
+    keyboard = "us"; # clavier physique en QWERTY
     terminal = "ghostty";
 
-    applis.enable = true;
+    apps.enable = true;
     dev.enable = true;
-    musique.enable = true;
+    music.enable = true;
     virtualisation.enable = true;
     zen.enable = true;
     searxng.enable = true;
     i2p.enable = true;
     vpn.enable = true;
-    maison.enable = true;
+    homeNetwork.enable = true;
   };
 
   # ─── Démarrage : Limine (thème et fond appliqués par Stylix) ────────────

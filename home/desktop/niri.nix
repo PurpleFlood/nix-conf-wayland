@@ -17,13 +17,13 @@
 let
   wallpaper = config.stylix.image;
 
-  # Disposition du clavier : option rice.clavier (le T470 est en QWERTY).
-  clavier = osConfig.rice.clavier;
+  # Disposition du clavier : option rice.keyboard (le T470 est en QWERTY).
+  keyboard = osConfig.rice.keyboard;
   ghostty = osConfig.rice.terminal == "ghostty";
 
   # Touches de la rangée des chiffres pour les bureaux 1 à 5.
-  touchesBureaux =
-    if clavier == "fr" then
+  workspaceKeys =
+    if keyboard == "fr" then
       [
         "ampersand"
         "eacute"
@@ -41,18 +41,18 @@ let
       ];
 
   # Génère « Mod+touche → bureau n » et « Mod+Shift+touche → envoyer sur n ».
-  raccourcisBureaux = lib.listToAttrs (
+  workspaceBinds = lib.listToAttrs (
     lib.concatLists (
-      lib.imap1 (n: touche: [
+      lib.imap1 (n: key: [
         {
-          name = "Mod+${touche}";
+          name = "Mod+${key}";
           value.action.focus-workspace = n;
         }
         {
-          name = "Mod+Shift+${touche}";
+          name = "Mod+Shift+${key}";
           value.action.move-column-to-workspace = n;
         }
-      ]) touchesBureaux
+      ]) workspaceKeys
     )
   );
 in
@@ -62,7 +62,7 @@ in
 
   programs.niri.settings = {
     input = {
-      keyboard.xkb.layout = clavier;
+      keyboard.xkb.layout = keyboard;
       touchpad = {
         tap = true; # toucher = clic
         natural-scroll = true;
@@ -118,7 +118,7 @@ in
 
     hotkey-overlay.skip-at-startup = true;
 
-    binds = raccourcisBureaux // {
+    binds = workspaceBinds // {
       # ── Applis ─────────────────────────────────────────────────────
       "Mod+Return".action.spawn =
         if ghostty then
@@ -129,10 +129,10 @@ in
         else
           [ "foot" ];
       "Mod+D".action.spawn = "anyrun";
-      "Mod+E".action.spawn-sh = "${osConfig.rice.lancerDansTerminal} yazi";
+      "Mod+E".action.spawn-sh = "${osConfig.rice.terminalExec} yazi";
       "Mod+Shift+E".action.spawn = "thunar";
-      "Mod+V".action.spawn = "presse-papiers"; # historique (home/bureau/lanceur.nix)
-      "Mod+Shift+Escape".action.spawn = "menu-extinction";
+      "Mod+V".action.spawn = "clipboard-menu"; # historique (home/desktop/launcher.nix)
+      "Mod+Shift+Escape".action.spawn = "power-menu";
       "Mod+Alt+L".action.spawn = "gtklock";
       "Mod+Shift+Slash".action.show-hotkey-overlay = [ ]; # aide des raccourcis
       "Mod+B".action.spawn = [

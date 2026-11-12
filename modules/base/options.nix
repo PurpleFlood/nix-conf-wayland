@@ -1,7 +1,7 @@
 # RÉGLAGES PAR MACHINE, utilisés par la base (système ET home-manager).
 # Valeurs par défaut sûres ; chaque machine les change dans son configuration.nix :
 #
-#   rice.clavier = "us";
+#   rice.keyboard = "us";
 #   rice.terminal = "ghostty";
 #
 # Côté home-manager, on les lit avec `osConfig.rice.…`.
@@ -9,7 +9,7 @@
 
 {
   options.rice = {
-    clavier = lib.mkOption {
+    keyboard = lib.mkOption {
       type = lib.types.str;
       default = "fr";
       example = "us";
@@ -28,7 +28,7 @@
       '';
     };
 
-    ecransConnexionEteints = lib.mkOption {
+    greeterDisabledOutputs = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [ ];
       example = [ "DP-1" ];
@@ -36,7 +36,7 @@
     };
 
     # Calculé à partir de `terminal` : à ne pas régler soi-même.
-    lancerDansTerminal = lib.mkOption {
+    terminalExec = lib.mkOption {
       type = lib.types.str;
       readOnly = true;
       description = "Préfixe pour ouvrir une commande dans le terminal : \"<préfixe> yazi\".";
@@ -44,8 +44,8 @@
   };
 
   config = {
-    rice.lancerDansTerminal = "${config.rice.terminal} -e";
+    rice.terminalExec = "${config.rice.terminal} -e";
 
-    console.keyMap = lib.mkDefault config.rice.clavier;
+    console.keyMap = lib.mkDefault config.rice.keyboard;
   };
 }

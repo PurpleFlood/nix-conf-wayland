@@ -3,13 +3,13 @@
 # À n'activer que sur les machines qui vivent chez toi : ailleurs, chaque
 # recherche DNS attendrait d'abord ton serveur local.
 #
-#   rice.maison.enable = true;
+#   rice.homeNetwork.enable = true;
 { config, lib, ... }:
 
 {
-  options.rice.maison.enable = lib.mkEnableOption "le DNS local et le certificat Caddy de la maison";
+  options.rice.homeNetwork.enable = lib.mkEnableOption "le DNS local et le certificat Caddy de la maison";
 
-  config = lib.mkIf config.rice.maison.enable {
+  config = lib.mkIf config.rice.homeNetwork.enable {
     # NetworkManager ne réécrit pas les DNS : ce sont ceux ci-dessous qui comptent.
     networking.networkmanager.dns = "none";
 

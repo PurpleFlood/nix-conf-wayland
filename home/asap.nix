@@ -1,5 +1,5 @@
 # TON UTILISATEUR (home-manager) : le rice de BASE, actif sur toutes les machines.
-# Chaque brique du rice a son fichier dans home/bureau/.
+# Chaque brique du rice a son fichier dans home/desktop/.
 #
 # Les modules optionnels (modules/*.nix) ajoutent leur partie utilisateur
 # eux-mêmes ; les réglages propres à une machine (écrans…) sont dans
@@ -8,16 +8,16 @@
 
 {
   imports = [
-    ./bureau/niri.nix # compositeur : fenêtres, raccourcis, écrans
-    ./bureau/waybar.nix # barre
-    ./bureau/lanceur.nix # anyrun : lanceur + menus (presse-papiers, extinction)
-    ./bureau/notifications.nix # mako
-    ./bureau/veille.nix # swayidle (+ gtklock côté système)
-    ./bureau/services.nix # fond d'écran, presse-papiers, OSD, lumière bleue, polkit, USB
+    ./desktop/niri.nix # compositeur : fenêtres, raccourcis, écrans
+    ./desktop/waybar.nix # barre
+    ./desktop/launcher.nix # anyrun : lanceur + menus (presse-papiers, extinction)
+    ./desktop/notifications.nix # mako
+    ./desktop/idle.nix # swayidle (+ gtklock côté système)
+    ./desktop/services.nix # fond d'écran, presse-papiers, OSD, lumière bleue, polkit, USB
     ./terminal.nix # foot ou Ghostty + fish, starship, zoxide, carapace
     ./neovim.nix # Neovim + AstroNvim (config dans dotfiles/nvim)
-    ./outils.nix # outils de base : CLI, images, vidéo, PDF, captures
-    ./navigateurs/firefox.nix # réglages communs : navigateurs/navigateur-commun.nix
+    ./tools.nix # outils de base : CLI, images, vidéo, PDF, captures
+    ./browsers/firefox.nix # réglages communs : browsers/browser-common.nix
   ];
 
   home.username = "asap";

@@ -16,17 +16,17 @@
     ./base
 
     # ─── Modules optionnels (rice.<nom>.enable) ───────────────────────────
-    ./applis.nix # applis généralistes : Discord, LibreOffice, Blender…
+    ./apps.nix # applis généralistes : Discord, LibreOffice, Blender…
     ./dev.nix # compilateurs, SDK, agents IA en terminal
-    ./musique.nix # DAW, plugins, audio basse latence
+    ./music.nix # DAW, plugins, audio basse latence
     ./gaming.nix # Steam, Heroic, Lutris, MangoHud…
     ./vr.nix # WiVRn (Quest), outils VRChat
-    ./ia.nix # Ollama, LM Studio, AnythingLLM
+    ./ai.nix # Ollama, LM Studio, AnythingLLM
     ./virtualisation.nix # podman, virt-manager
     ./zen.nix # navigateur Zen
     ./searxng.nix # moteur de recherche local
     ./i2p.nix # réseau anonyme I2P
     ./vpn.nix # commande `vpn` (Mullvad / WireGuard)
-    ./maison.nix # DNS local + certificat Caddy (réseau de la maison)
+    ./home-network.nix # DNS local + certificat Caddy (réseau de la maison)
   ];
 }

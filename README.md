@@ -10,8 +10,8 @@ avec un `git clone` et une commande.
 |---|---|---|
 | `minimal` | `sudo nixos-rebuild switch --flake .#minimal --impure` | aucun : la base seule, pour installer n'importe quel PC |
 | `pc` | `sudo nixos-rebuild switch --flake .#pc` | tout (NVIDIA RTX 3050, 2 écrans, Ghostty) |
-| `t470` | `sudo nixos-rebuild switch --flake .#t470` | applis, dev, musique, virtualisation, Zen, SearXNG, I2P, VPN, maison (QWERTY, Ghostty) |
-| `r400` | `sudo nixos-rebuild switch --flake .#r400` | dev (sans agents IA), VPN, maison (Core 2 Duo, GMA 4500, BIOS) |
+| `t470` | `sudo nixos-rebuild switch --flake .#t470` | apps, dev, music, virtualisation, zen, searxng, i2p, vpn, homeNetwork (QWERTY, Ghostty) |
+| `r400` | `sudo nixos-rebuild switch --flake .#r400` | dev (sans aiAgents), vpn, homeNetwork (Core 2 Duo, GMA 4500, BIOS) |
 | `vm` | `nix run .#vm` | aucun : machine virtuelle de test de la base |
 
 Rebuild d'une autre machine depuis le PC (elle doit être allumée, SSH actif) :
@@ -49,7 +49,7 @@ la génération précédente reste disponible dans le menu de démarrage.
 |---|---|
 | `flake.nix` | sources (nixpkgs, unstable, home-manager, Stylix, niri-flake, Zen) et liste des machines |
 | `modules/base/` | **la base, toujours active** : système, réseau, son, bureau (niri, ReGreet, gtklock), thème |
-| `modules/base/options.nix` | réglages par machine : `rice.clavier`, `rice.terminal`, `rice.ecransConnexionEteints` |
+| `modules/base/options.nix` | réglages par machine : `rice.keyboard`, `rice.terminal`, `rice.greeterDisabledOutputs` |
 | `modules/<nom>.nix` | **un module optionnel** : tout ce qui le concerne (système ET utilisateur), éteint par défaut |
 | `home/` | le rice de base côté utilisateur : niri, waybar, anyrun, foot/Ghostty, fish, Neovim, Firefox |
 | `hosts/<machine>/` | **propre à une machine** : disques, démarrage, matériel, modules allumés (+ `home.nix` si besoin) |
@@ -65,24 +65,24 @@ Chaque module s'allume dans `hosts/<machine>/configuration.nix` :
 rice = {
   terminal = "ghostty"; # foot par défaut (marche partout)
   gaming.enable = true;
-  musique.enable = true;
+  music.enable = true;
 };
 ```
 
 | Module | Contenu |
 |---|---|
-| `applis` | Discord, Mumble, LibreOffice, Obsidian, Blender, Krita, Spotify, OBS, Twitch, Flatpak, AppImage… |
-| `dev` | cmake, Rust, JDK, .NET, Ghidra, Ansible ; `dev.agentsIA` : Claude Code, opencode (processeur avec AVX) |
-| `musique` | Reaper, Bitwig, Vital, VCV Rack, Cardinal, yabridge, JACK basse latence |
+| `apps` | Discord, Mumble, LibreOffice, Obsidian, Blender, Krita, Spotify, OBS, Twitch, Flatpak, AppImage… |
+| `dev` | cmake, Rust, JDK, .NET, Ghidra, Ansible ; `dev.aiAgents` : Claude Code, opencode (processeur avec AVX) |
+| `music` | Reaper, Bitwig, Vital, VCV Rack, Cardinal, yabridge, JACK basse latence |
 | `gaming` | Steam (Proton, gamescope, NTSync), Heroic, Lutris, Prism Launcher, MangoHud |
 | `vr` | WiVRn (Quest), xrizer, ALCOM, vrc-get, Unity Hub, BSManager |
-| `ia` | Ollama (Vulkan), LM Studio, AnythingLLM, Heretic |
+| `ai` | Ollama (Vulkan), LM Studio, AnythingLLM, Heretic |
 | `virtualisation` | podman, virt-manager |
 | `zen` | navigateur Zen (favoris partagés avec le dépôt) |
 | `searxng` | moteur de recherche local (devient la recherche par défaut des navigateurs) |
 | `i2p` | réseau anonyme I2P |
 | `vpn` | commande `vpn` (Mullvad) + bouton dans la barre |
-| `maison` | DNS local + certificat Caddy (machines qui restent à la maison) |
+| `homeNetwork` | DNS local + certificat Caddy (machines qui restent à la maison) |
 
 Ajouter un paquet : dans le module qui lui correspond. Ajouter un module :
 copier un module existant, changer son nom, l'ajouter à `modules/default.nix`.
@@ -91,8 +91,8 @@ copier un module existant, changer son nom, l'ajouter à `modules/default.nix`.
 
 1. Depuis la clé live : partitionner, monter sur `/mnt`, `nixos-generate-config --root /mnt`,
    cloner le dépôt dans `/mnt/home/asap/git/nix-conf-wayland`, puis :
-   `RICE_MATERIEL=/mnt/etc/nixos/hardware-configuration.nix nixos-install --flake .#minimal --impure`
-   (BIOS : GRUB sur `/dev/sda`, ou `RICE_DISQUE=/dev/…` ; UEFI : systemd-boot, détecté tout seul).
+   `RICE_HARDWARE=/mnt/etc/nixos/hardware-configuration.nix nixos-install --flake .#minimal --impure`
+   (BIOS : GRUB sur `/dev/sda`, ou `RICE_DISK=/dev/…` ; UEFI : systemd-boot, détecté tout seul).
 2. Sur la machine installée : créer `hosts/<nom>/` (copier `hosts/r400/` comme modèle),
    y copier `/etc/nixos/hardware-configuration.nix`, allumer les modules voulus,
    ajouter `nixosConfigurations.<nom> = mkHost "<nom>";` dans `flake.nix`, `git add`, puis
@@ -152,7 +152,7 @@ copier un module existant, changer son nom, l'ajouter à `modules/default.nix`.
 - **Fond d'écran / couleurs** : remplacer l'image dans `wallpapers/` (et le chemin dans
   `modules/base/theme.nix` si le nom change), `git add -A`, rebuild, se reconnecter.
 - **Favoris** (Zen) : exportés à la fermeture du navigateur dans
-  `dotfiles/favoris.html`, réimportés au démarrage. Les commiter pour les garder.
+  `dotfiles/bookmarks.html`, réimportés au démarrage. Les commiter pour les garder.
 - **Neovim** : config dans `dotfiles/nvim`, modifiable sans rebuild.
 - **VPN** : clic sur 󰖂 dans la barre, ou `sudo vpn <pays> | off | status | list`.
   Les fichiers Mullvad restent dans `/etc/wireguard/<pays>/` (hors dépôt).

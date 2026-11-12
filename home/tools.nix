@@ -1,6 +1,6 @@
 # OUTILS DE BASE (toutes les machines) : ce qu'il faut pour que le rice
 # soit complet et pour travailler en terminal. Rien de lourd ici :
-# les applis généralistes sont dans modules/applis.nix, le dev dans modules/dev.nix.
+# les applis généralistes sont dans modules/apps.nix, le dev dans modules/dev.nix.
 { pkgs, ... }:
 
 {
@@ -13,7 +13,7 @@
     settings.general = {
       copy-command = "wl-copy";
       early-exit = true; # se ferme après la copie
-      output-filename = "~/Images/Captures/annotee-%Y-%m-%d_%H-%M-%S.png";
+      output-filename = "~/Images/Captures/annotated-%Y-%m-%d_%H-%M-%S.png";
     };
   };
 

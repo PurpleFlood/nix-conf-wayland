@@ -9,7 +9,7 @@
   networking.hostName = "rice-vm";
 
   # Base seule (rien d'allumé) : c'est elle qu'on teste ici.
-  # Ajoute des modules au besoin, par exemple : rice.applis.enable = true;
+  # Ajoute des modules au besoin, par exemple : rice.apps.enable = true;
 
   # ─── Réglages de la VM (appliqués seulement par `nix run .#vm`) ───────────
   virtualisation.vmVariant = {

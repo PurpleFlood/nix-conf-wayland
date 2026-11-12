@@ -2,7 +2,7 @@
 # (Neovim, git et leurs outils sont dans la base : home/neovim.nix.)
 #
 #   rice.dev.enable = true;
-#   rice.dev.agentsIA = false;   # sur un vieux processeur sans AVX (R400…)
+#   rice.dev.aiAgents = false;   # sur un vieux processeur sans AVX (R400…)
 { config, lib, pkgs, ... }:
 
 let
@@ -12,7 +12,7 @@ in
   options.rice.dev = {
     enable = lib.mkEnableOption "les outils de développement";
 
-    agentsIA = lib.mkOption {
+    aiAgents = lib.mkOption {
       type = lib.types.bool;
       default = true;
       description = ''
@@ -41,7 +41,7 @@ in
         # Automatisation
         ansible
       ]
-      ++ lib.optionals cfg.agentsIA [
+      ++ lib.optionals cfg.aiAgents [
         claude-code
         opencode
       ];

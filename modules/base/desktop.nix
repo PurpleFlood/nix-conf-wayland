@@ -13,25 +13,25 @@ let
   # ── Écran de connexion : ReGreet lancé dans un mini-niri ──────────────
   # (au lieu de cage, qui étale la fenêtre sur tous les écrans et ignore
   # la disposition du clavier).
-  clavier = config.rice.clavier;
+  keyboard = config.rice.keyboard;
 
   # Écrans éteints pendant la connexion : ReGreet n'apparaît que sur l'écran
   # principal. La session niri rallume ensuite tous les écrans.
-  ecransEteints = config.rice.ecransConnexionEteints;
+  disabledOutputs = config.rice.greeterDisabledOutputs;
 
-  niriConnexion = pkgs.writeText "niri-connexion.kdl" ''
+  niriGreeter = pkgs.writeText "niri-greeter.kdl" ''
     input {
         keyboard {
             xkb {
-                layout "${clavier}"
+                layout "${keyboard}"
             }
         }
     }
-    ${lib.concatMapStrings (ecran: ''
-      output "${ecran}" {
+    ${lib.concatMapStrings (output: ''
+      output "${output}" {
           off
       }
-    '') ecransEteints}
+    '') disabledOutputs}
     hotkey-overlay {
         skip-at-startup
     }
@@ -41,7 +41,7 @@ in
 {
   # ─── Compositeur ───────────────────────────────────────────────────────
   # Le module installe niri, les portails (partage d'écran, sélecteur de
-  # fichiers…) et le trousseau. Sa configuration est dans home/bureau/niri.nix.
+  # fichiers…) et le trousseau. Sa configuration est dans home/desktop/niri.nix.
   programs.niri.enable = true;
   environment.systemPackages = [ pkgs.xwayland-satellite ]; # applis X11, lancé par niri
 
@@ -49,7 +49,7 @@ in
   # Au démarrage : choix de l'utilisateur et de la session, puis lance niri.
   # Couleurs, police, curseur et fond : appliqués par Stylix.
   services.greetd.settings.default_session.command =
-    "${pkgs.dbus}/bin/dbus-run-session ${lib.getExe pkgs.niri} -c ${niriConnexion}";
+    "${pkgs.dbus}/bin/dbus-run-session ${lib.getExe pkgs.niri} -c ${niriGreeter}";
 
   programs.regreet = {
     enable = true;
@@ -60,7 +60,7 @@ in
   };
 
   # ─── Écran de verrouillage : gtklock ───────────────────────────────────
-  # Déclenché par swayidle (home/bureau/veille.nix) ou par un raccourci niri.
+  # Déclenché par swayidle (home/desktop/idle.nix) ou par un raccourci niri.
   # Stylix ne gère pas gtklock : on lui passe la palette à la main.
   programs.gtklock = {
     enable = true;

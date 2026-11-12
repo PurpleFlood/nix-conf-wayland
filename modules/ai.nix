@@ -1,7 +1,7 @@
 # IA LOCALE : Ollama (Vulkan), LM Studio, AnythingLLM (en conteneur),
 # Heretic (PyTorch CUDA via uv).
 #
-#   rice.ia.enable = true;
+#   rice.ai.enable = true;
 { config, lib, pkgs, ... }:
 
 let
@@ -12,9 +12,9 @@ let
   '';
 in
 {
-  options.rice.ia.enable = lib.mkEnableOption "l'IA locale (Ollama, LM Studio, AnythingLLM)";
+  options.rice.ai.enable = lib.mkEnableOption "l'IA locale (Ollama, LM Studio, AnythingLLM)";
 
-  config = lib.mkIf config.rice.ia.enable {
+  config = lib.mkIf config.rice.ai.enable {
     # Ollama en Vulkan : pas de compilation CUDA, marche avec toutes les cartes
     services.ollama = {
       enable = true;

@@ -20,7 +20,7 @@
   # ─── Langue, heure, clavier ────────────────────────────────────────────
   time.timeZone = "Europe/Paris";
   i18n.defaultLocale = "fr_FR.UTF-8";
-  # (clavier : option rice.clavier, dans base/options.nix)
+  # (clavier : option rice.keyboard, dans base/options.nix)
 
   # ─── Utilisateur ───────────────────────────────────────────────────────
   # bash reste le shell de connexion (il prépare la session) ;

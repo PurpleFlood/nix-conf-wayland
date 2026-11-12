@@ -11,10 +11,10 @@
   rice = {
     dev = {
       enable = true;
-      agentsIA = false; # Claude Code / opencode : pas d'AVX sur le Core 2 Duo
+      aiAgents = false; # Claude Code / opencode : pas d'AVX sur le Core 2 Duo
     };
     vpn.enable = true;
-    maison.enable = true;
+    homeNetwork.enable = true;
   };
 
   # BIOS classique (pas d'UEFI) : GRUB sur le disque entier.

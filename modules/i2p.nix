@@ -14,7 +14,7 @@
 let
   # Port pour les autres routeurs I2P. À recopier dans la console :
   # Configuration → Réseau → « Port UDP » et « Port TCP ».
-  portI2p = 18234;
+  i2pPort = 18234;
 in
 {
   options.rice.i2p.enable = lib.mkEnableOption "le réseau anonyme I2P";
@@ -23,8 +23,8 @@ in
     services.i2p.enable = true;
 
     networking.firewall = {
-      allowedTCPPorts = [ portI2p ];
-      allowedUDPPorts = [ portI2p ];
+      allowedTCPPorts = [ i2pPort ];
+      allowedUDPPorts = [ i2pPort ];
     };
   };
 }

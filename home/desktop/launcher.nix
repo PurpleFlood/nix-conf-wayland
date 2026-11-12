@@ -8,9 +8,9 @@
 }:
 
 let
-  plugin = nom: "${pkgs.anyrun}/lib/lib${nom}.so";
+  plugin = name: "${pkgs.anyrun}/lib/lib${name}.so";
 
-  # Menu « liste » : affiche l'entrée standard dans anyrun, renvoie le choix.
+  # Menu « liste » : affiche l'entrée standard dans anyrun, renvoie le choice.
   menu = ''${pkgs.anyrun}/bin/anyrun --plugins ${plugin "stdin"} --show-results-immediately true'';
 in
 {
@@ -32,19 +32,19 @@ in
 
   home.packages = [
     # Mod+V : choisir dans l'historique du presse-papiers.
-    (pkgs.writeShellScriptBin "presse-papiers" ''
+    (pkgs.writeShellScriptBin "clipboard-menu" ''
       cliphist list | ${menu} | cliphist decode | wl-copy
     '')
 
     # Mod+Shift+Échap ou bouton ⏻ de la barre : menu d'extinction.
-    (pkgs.writeShellScriptBin "menu-extinction" ''
-      choix=$(printf '%s\n' \
+    (pkgs.writeShellScriptBin "power-menu" ''
+      choice=$(printf '%s\n' \
         "󰌾  Verrouiller" \
         "󰤄  Mettre en veille" \
         "󰍃  Se déconnecter" \
         "󰜉  Redémarrer" \
         "󰐥  Éteindre" | ${menu})
-      case "$choix" in
+      case "$choice" in
         *Verrouiller*) gtklock -d ;;
         *veille*) systemctl suspend ;;
         *déconnecter*) niri msg action quit --skip-confirmation ;;
@@ -58,11 +58,11 @@ in
   ++ lib.optional osConfig.rice.vpn.enable (
     pkgs.writeShellScriptBin "vpn-menu" ''
       export PATH=/run/wrappers/bin:/run/current-system/sw/bin:$PATH
-      choix=$( { sudo -n vpn list; echo "Déconnecter"; } | ${menu})
-      [ -z "$choix" ] && exit 0
-      [ "$choix" = "Déconnecter" ] && cible=off || cible="$choix"
-      notify-send "VPN" "$( [ "$cible" = off ] && echo "Déconnexion…" || echo "Connexion : $cible…" )"
-      notify-send "VPN" "$(sudo -n vpn "$cible" 2>&1 | tail -n 1)"
+      choice=$( { sudo -n vpn list; echo "Déconnecter"; } | ${menu})
+      [ -z "$choice" ] && exit 0
+      [ "$choice" = "Déconnecter" ] && target=off || target="$choice"
+      notify-send "VPN" "$( [ "$target" = off ] && echo "Déconnexion…" || echo "Connexion : $target…" )"
+      notify-send "VPN" "$(sudo -n vpn "$target" 2>&1 | tail -n 1)"
       # Met à jour le bouton de la barre tout de suite.
       systemctl --user kill --signal=SIGRTMIN+8 waybar.service
     ''

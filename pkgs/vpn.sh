@@ -1,7 +1,7 @@
 #!/bin/bash
 # vpn : connexion Mullvad (WireGuard) par pays, sur le serveur le plus rapide.
 #
-#   vpn <pays>   se connecte au meilleur serveur du dossier /etc/wireguard/<pays>/
+#   vpn <pays>   se connecte au best serveur du dossier /etc/wireguard/<pays>/
 #   vpn off      se déconnecte
 #   vpn status   affiche la connexion en cours
 #   vpn list     liste les pays disponibles
@@ -10,21 +10,21 @@
 
 DIR="${VPN_DIR:-/etc/wireguard}"
 
-# Interfaces WireGuard actives
-actives() { wg show interfaces 2>/dev/null; }
+# Interfaces WireGuard active_interfaces
+active_interfaces() { wg show interfaces 2>/dev/null; }
 
 # Retrouve le fichier .conf d'une interface active
-conf_de() { find "$DIR" -name "$1.conf" | head -1; }
+conf_of() { find "$DIR" -name "$1.conf" | head -1; }
 
-deconnecter() {
-  for i in $(actives); do
+disconnect() {
+  for i in $(active_interfaces); do
     echo "Déconnexion de $i…"
-    wg-quick down "$(conf_de "$i")" >/dev/null 2>&1
+    wg-quick down "$(conf_of "$i")" >/dev/null 2>&1
   done
 }
 
 # Latence moyenne (ms) vers le serveur d'un fichier .conf, 9999 si injoignable
-latence() {
+latency() {
   local ip
   ip=$(sed -n 's/^[[:space:]]*Endpoint[[:space:]]*=[[:space:]]*\(.*\):[0-9]*$/\1/p' "$1" | head -1 | tr -d '[]')
   [ -z "$ip" ] && { echo 9999; return; }
@@ -34,10 +34,10 @@ latence() {
 
 case "${1:-}" in
   off)
-    deconnecter
+    disconnect
     ;;
   status)
-    a=$(actives)
+    a=$(active_interfaces)
     if [ -n "$a" ]; then echo "Connecté : $a"; else echo "Non connecté"; fi
     ;;
   list)
@@ -48,32 +48,32 @@ case "${1:-}" in
     exit 1
     ;;
   *)
-    pays="$1"
-    [ -d "$DIR/$pays" ] || { echo "Pays inconnu : $pays (voir : vpn list)"; exit 1; }
+    country="$1"
+    [ -d "$DIR/$country" ] || { echo "Pays inconnu : $country (voir : vpn list)"; exit 1; }
 
-    # On se déconnecte d'abord : le kill switch bloquerait les tests de latence
-    deconnecter
+    # On se déconnecte d'abord : le kill switch bloquerait les tests de latency
+    disconnect
 
-    meilleur=""; meilleure=9999
-    for f in "$DIR/$pays"/*.conf; do
+    best=""; best_ms=9999
+    for f in "$DIR/$country"/*.conf; do
       [ -e "$f" ] || continue
-      ms=$(latence "$f")
+      ms=$(latency "$f")
       printf '  %-25s %s ms\n' "$(basename "$f" .conf)" "$ms"
-      if [ "$ms" -lt "$meilleure" ]; then meilleure=$ms; meilleur=$f; fi
+      if [ "$ms" -lt "$best_ms" ]; then best_ms=$ms; best=$f; fi
     done
 
     # Aucun serveur n'a répondu au ping : on prend un fichier au hasard
-    if [ -z "$meilleur" ]; then
-      meilleur=$(ls "$DIR/$pays"/*.conf 2>/dev/null | shuf -n 1)
-      [ -z "$meilleur" ] && { echo "Aucun fichier .conf dans $DIR/$pays"; exit 1; }
+    if [ -z "$best" ]; then
+      best=$(ls "$DIR/$country"/*.conf 2>/dev/null | shuf -n 1)
+      [ -z "$best" ] && { echo "Aucun fichier .conf dans $DIR/$country"; exit 1; }
       echo "Aucun serveur n'a répondu au ping, choix au hasard."
     fi
 
-    echo "Connexion à $(basename "$meilleur" .conf)…"
-    if sortie=$(wg-quick up "$meilleur" 2>&1); then
+    echo "Connexion à $(basename "$best" .conf)…"
+    if output=$(wg-quick up "$best" 2>&1); then
       echo "Connecté."
     else
-      echo "Échec de la connexion :"; echo "$sortie"; exit 1
+      echo "Échec de la connexion :"; echo "$output"; exit 1
     fi
     ;;
 esac
