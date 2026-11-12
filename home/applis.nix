@@ -64,79 +64,81 @@ in
     gitCredentialHelper.enable = true;
   };
 
-  home.packages = with pkgs; [
-    # ─── Bureau Wayland ──────────────────────────────────────────────────
-    imv # images
-    vlc
-    wiremix # mixeur PipeWire en terminal
-    bluetui # Bluetooth en terminal
-    playerctl # touches lecture / pause / suivant
-    brightnessctl # luminosité
-    grim # capture d'une zone…
-    slurp # …sélectionnée à la souris
-    wl-clipboard # wl-copy / wl-paste
-    libnotify # notify-send
+  home.packages =
+    with pkgs;
+    [
+      # ─── Bureau Wayland ──────────────────────────────────────────────────
+      imv # images
+      vlc
+      wiremix # mixeur PipeWire en terminal
+      bluetui # Bluetooth en terminal
+      playerctl # touches lecture / pause / suivant
+      brightnessctl # luminosité
+      grim # capture d'une zone…
+      slurp # …sélectionnée à la souris
+      wl-clipboard # wl-copy / wl-paste
+      libnotify # notify-send
 
-    # ─── Terminal / CLI ──────────────────────────────────────────────────
-    bat
-    eza
-    fzf
-    btop
-    htop
-    fastfetch
-    glow
-    jq
-    _7zz
-    xz
-    zstd
-    unzip
-    newsboat
-    yt-dlp
-    ansible
-    pkgs-unstable.ani-cli # suit les changements des sites
-    sshfs
-    openssl
+      # ─── Terminal / CLI ──────────────────────────────────────────────────
+      bat
+      eza
+      fzf
+      btop
+      htop
+      fastfetch
+      glow
+      jq
+      _7zz
+      xz
+      zstd
+      unzip
+      newsboat
+      yt-dlp
+      ansible
+      pkgs-unstable.ani-cli # suit les changements des sites
+      sshfs
+      openssl
 
-    # --- compatibilité
-    bottles
+      # --- compatibilité
+      bottles
 
-    # Twitch
-    wtwitch
-    twitch-tui
-    twitch-dl
-    streamlink
-    ffmpeg
+      # Twitch
+      wtwitch
+      twitch-tui
+      twitch-dl
+      streamlink
+      ffmpeg
 
-    # ─── Applis ──────────────────────────────────────────────────────────
-    file-roller
-    keepassxc
-    qbittorrent
-    pidgin
-    mumble
-    discord
-    spotify
-    spotify-player
-    obsidian
-    blender
-    krita
-    libreoffice
-    nextcloud-client
-    filezilla
-    bitwig
+      # ─── Applis ──────────────────────────────────────────────────────────
+      file-roller
+      keepassxc
+      qbittorrent
+      pidgin
+      mumble
+      discord
+      spotify
+      spotify-player
+      obsidian
+      blender
+      krita
+      libreoffice
+      nextcloud-client
+      filezilla
+      bitwig
 
-    # ─── Dev ─────────────────────────────────────────────────────────────
-    # (gcc et nodejs sont dans home/neovim.nix)
-    cmake
-    gnumake
-    pkg-config
-    rustc
-    cargo
-    jdk21
-    dotnet-sdk
-    ghidra
-    podman-compose
-   ]
-    ++ lib.optional (host != "r400") [
+      # ─── Dev ─────────────────────────────────────────────────────────────
+      # (gcc et nodejs sont dans home/neovim.nix)
+      cmake
+      gnumake
+      pkg-config
+      rustc
+      cargo
+      jdk21
+      dotnet-sdk
+      ghidra
+      podman-compose
+    ]
+    ++ lib.optionals (host != "r400") [
       claude-code
       opencode
     ];

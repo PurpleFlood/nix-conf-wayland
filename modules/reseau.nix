@@ -3,6 +3,17 @@
 { ... }:
 
 {
+
+  # Chaque machine s'annonce sur le réseau local : ssh asap@r400.local
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true; # le système sait résoudre les noms en .local
+    publish = {
+      enable = true;
+      addresses = true;
+    };
+  };
+
   # NetworkManager ne réécrit pas les DNS : ce sont ceux ci-dessous qui comptent.
   networking.networkmanager.dns = "none";
 
