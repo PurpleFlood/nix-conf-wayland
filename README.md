@@ -17,18 +17,21 @@ nixos-rebuild build --flake .#minimal --impure --override-input private path:./p
 
 | Machine | Commande | Profil et modules |
 |---|---|---|
-| `minimal` | `sudo nixos-rebuild switch --flake .#minimal --impure` | niri seul, pour installer n'importe quel PC |
-| `pc` | `sudo nixos-rebuild switch --flake .#pc` | niri + tout (NVIDIA RTX 3050, 2 écrans, Ghostty) |
-| `t470` | `sudo nixos-rebuild switch --flake .#t470` | niri + apps, dev, music, virtualisation, zen, searxng, i2p, vpn, homeNetwork (QWERTY, Ghostty) |
-| `r400` | `sudo nixos-rebuild switch --flake .#r400` | niri + dev (sans aiAgents), vpn, homeNetwork (Core 2 Duo, GMA 4500, BIOS) |
+| `minimal` | `nixos-rebuild switch --flake .#minimal --impure --sudo` | niri seul, pour installer n'importe quel PC |
+| `pc` | `nixos-rebuild switch --flake .#pc --sudo` | niri + tout (NVIDIA RTX 3050, 2 écrans, Ghostty) |
+| `t470` | `nixos-rebuild switch --flake .#t470 --sudo` | niri + apps, dev, music, virtualisation, zen, searxng, i2p, vpn, homeNetwork (QWERTY, Ghostty) |
+| `r400` | `nixos-rebuild switch --flake .#r400 --sudo` | niri + dev (sans aiAgents), vpn, homeNetwork (Core 2 Duo, GMA 4500, BIOS) |
 | `sl510` | mises à jour automatiques chaque nuit | simple (Cinnamon) + tailscale, portable prêté |
 | `vm` | `nix run .#vm` | niri seul, machine virtuelle de test |
+
+`--sudo` à la fin (et pas `sudo` devant) : la config est construite avec ton compte, qui a la clé SSH
+pour lire le dépôt privé ; seule l'activation passe par sudo.
 
 Rebuild d'une autre machine depuis le PC (elle doit être allumée, SSH actif) :
 `nixos-rebuild switch --flake .#r400 --target-host asap@<ip> --sudo --ask-sudo-password`
 
 Après un premier changement de config sur une machine, préférer
-`sudo nixos-rebuild boot --flake .#<machine>` puis redémarrer : en cas de souci,
+`nixos-rebuild boot --flake .#<machine> --sudo` puis redémarrer : en cas de souci,
 la génération précédente reste disponible dans le menu de démarrage.
 
 Après une modification du dépôt privé (poussée sur GitHub) : `nix flake update private`,
@@ -124,7 +127,7 @@ copier un module existant, changer son nom, l'ajouter à `modules/default.nix`.
 2. Sur la machine installée : créer `hosts/<nom>/` (copier `hosts/r400/` ou `hosts/sl510/` comme modèle),
    y copier `/etc/nixos/hardware-configuration.nix`, choisir le profil et les modules,
    ajouter `nixosConfigurations.<nom> = mkHost "<nom>";` dans `flake.nix`, `git add`, puis
-   `sudo nixos-rebuild switch --flake .#<nom>` : la machine change de nom et de config.
+   `nixos-rebuild switch --flake .#<nom> --sudo` : la machine change de nom et de config.
 
 ### Une machine pour un proche (profil simple)
 
