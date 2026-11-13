@@ -62,7 +62,9 @@ in
 
   programs.niri.settings = {
     input = {
-      keyboard.xkb.layout = keyboard;
+      # Deux dispositions : la principale + QWERTY (jeux mal adaptés à l'AZERTY).
+      # Mod+Shift+Space pour passer de l'une à l'autre.
+      keyboard.xkb.layout = if keyboard == "us" then "us" else "${keyboard},us";
       touchpad = {
         tap = true; # toucher = clic
         natural-scroll = true;
@@ -149,6 +151,7 @@ in
       "Mod+Shift+F".action.fullscreen-window = [ ];
       "Mod+R".action.switch-preset-column-width = [ ];
       "Mod+Space".action.toggle-window-floating = [ ];
+      "Mod+Shift+Space".action.switch-layout = "next"; # AZERTY ↔ QWERTY
       "Mod+Tab".action.toggle-overview = [ ]; # vue d'ensemble
 
       "Mod+Left".action.focus-column-left = [ ];
