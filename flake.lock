@@ -276,12 +276,29 @@
         "type": "github"
       }
     },
+    "private": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794599989,
+        "narHash": "sha256-T0Hw4VZc+7XD4gyKENF6JMy+fUG9cUBMW4lSz3fq+bY=",
+        "ref": "refs/heads/master",
+        "rev": "68b30e3cb35739d0bf4ebfb9bfa19ed3481a9905",
+        "revCount": 2,
+        "type": "git",
+        "url": "ssh://git@github.com/PurpleFlood/nix-private"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/PurpleFlood/nix-private"
+      }
+    },
     "root": {
       "inputs": {
         "home-manager": "home-manager",
         "niri": "niri",
         "nixpkgs": "nixpkgs",
         "nixpkgs-unstable": "nixpkgs-unstable",
+        "private": "private",
         "stylix": "stylix",
         "zen-browser": "zen-browser"
       }
