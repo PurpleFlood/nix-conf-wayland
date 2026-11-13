@@ -114,7 +114,7 @@ rice = {
 | `apps` | Discord, Mumble, LibreOffice, Obsidian, Blender, Krita, Spotify, OBS, Twitch, Flatpak, AppImage… |
 | `dev` | cmake, Rust, JDK, .NET, Ghidra, Ansible ; `dev.aiAgents` : Claude Code, opencode (processeur avec AVX) |
 | `music` | Reaper, Bitwig, Vital, VCV Rack, Cardinal, yabridge, JACK basse latence |
-| `gaming` | Steam (Proton, gamescope, NTSync), Heroic, Lutris, Prism Launcher, MangoHud |
+| `gaming` | Steam (Proton, gamescope, NTSync), Heroic, Lutris, Prism Launcher, MangoHud, GeForce NOW (`gaming.geforceNow`) |
 | `vr` | WiVRn (Quest), xrizer, ALCOM, vrc-get, Unity Hub, BSManager |
 | `ai` | Ollama (Vulkan), LM Studio, AnythingLLM, Heretic |
 | `virtualisation` | podman, virt-manager |

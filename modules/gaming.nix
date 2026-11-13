@@ -1,7 +1,9 @@
-# JEUX : Steam (Proton, gamescope), Heroic, Lutris, Prism Launcher, MangoHud.
+# JEUX : Steam (Proton, gamescope), Heroic, Lutris, Prism Launcher, MangoHud,
+# + GeForce NOW (jeux en streaming, pour ceux dont l'anti-cheat bloque Linux).
 # Les configs modifiables (MangoHud, Heroic, Prism) sont dans dotfiles/games/.
 #
 #   rice.gaming.enable = true;
+#   rice.gaming.geforceNow = false;   # pour ne pas installer GeForce NOW
 { config, lib, pkgs, ... }:
 
 let
@@ -20,7 +22,18 @@ let
       pkgs.prismlauncher;
 in
 {
-  options.rice.gaming.enable = lib.mkEnableOption "les jeux";
+  options.rice.gaming = {
+    enable = lib.mkEnableOption "les jeux";
+
+    geforceNow = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        GeForce NOW : jeux exécutés sur les serveurs de NVIDIA et diffusés en vidéo
+        (Destiny 2 et autres jeux dont l'anti-cheat refuse Linux). Abonnement NVIDIA.
+      '';
+    };
+  };
 
   config = lib.mkIf config.rice.gaming.enable {
     # NTSYNC : synchronisation façon Windows pour Proton (moins de saccades)
@@ -35,6 +48,37 @@ in
     };
     programs.gamemode.enable = true;
     programs.gamescope.enable = true;
+
+    # ─── GeForce NOW ──────────────────────────────────────────────────────
+    # NVIDIA ne le distribue qu'en Flatpak, depuis son propre dépôt. Ce service
+    # l'installe 2 minutes après le démarrage (sans ralentir le boot), puis le
+    # met à jour chaque semaine. Il apparaît dans le lanceur : « NVIDIA GeForce NOW ».
+    # Si la fenêtre ne s'ouvre pas sous Wayland :
+    #   flatpak override --user --nosocket=wayland com.nvidia.geforcenow
+    services.flatpak.enable = lib.mkIf config.rice.gaming.geforceNow true;
+
+    systemd.services.geforce-now = lib.mkIf config.rice.gaming.geforceNow {
+      description = "Installation et mise à jour de GeForce NOW (Flatpak NVIDIA)";
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
+      path = [ pkgs.flatpak ];
+      serviceConfig.Type = "oneshot";
+      script = ''
+        # Flathub fournit le socle (runtime) dont l'appli a besoin
+        flatpak remote-add --system --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+        flatpak remote-add --system --if-not-exists GeForceNOW https://international.download.nvidia.com/GFNLinux/flatpak/geforcenow.flatpakrepo
+        flatpak install --system --noninteractive --or-update GeForceNOW com.nvidia.geforcenow
+      '';
+    };
+
+    systemd.timers.geforce-now = lib.mkIf config.rice.gaming.geforceNow {
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnBootSec = "2min";
+        OnUnitActiveSec = "1w";
+        Persistent = true;
+      };
+    };
 
     # ─── Côté utilisateur ─────────────────────────────────────────────────
     home-manager.users.${config.rice.user} = {
