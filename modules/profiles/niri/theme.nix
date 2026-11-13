@@ -14,7 +14,7 @@
   config = lib.mkIf (config.rice.profile == "niri") {
     stylix = {
       enable = true;
-      image = ../../wallpapers/wallhaven-r7gzzm.jpg;
+      image = ../../../wallpapers/wallhaven-r7gzzm.jpg;
       polarity = "dark"; # palette sombre
 
       cursor = {
