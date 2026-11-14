@@ -45,6 +45,7 @@ in
 
         # Bureautique / notes
         libreoffice
+        anytype
         obsidian
         keepassxc
         nextcloud-client
