@@ -3,7 +3,12 @@
 #
 #   rice.dev.enable = true;
 #   rice.dev.aiAgents = false;   # sur un vieux processeur sans AVX (R400…)
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.rice.dev;
@@ -40,6 +45,9 @@ in
 
         # Automatisation
         ansible
+
+        # Monitoring réseau
+        sniffnet
       ]
       ++ lib.optionals cfg.aiAgents [
         claude-code
