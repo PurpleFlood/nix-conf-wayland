@@ -11,12 +11,16 @@
 #                          de l'image sous le curseur à droite. ↑ ↓ ou taper un
 #                          bout du nom, Entrée pour choisir, Échap pour annuler.
 #   wallpaper style        garder le fond, changer seulement le style de palette
-#   wallpaper set <image> [style]
+#   wallpaper set <image> [style]   (style par défaut : auto)
 #   wallpaper restore      remet le dernier fond (lancé à l'ouverture de session)
 #   wallpaper colors       recalcule seulement les couleurs (lancé à chaque rebuild)
 #
-# Styles de palette (du plus doux au plus coloré) : neutral, tonal-spot (par
-# défaut), content (fidèle à l'image), expressive, monochrome.
+# Styles de palette (du plus doux au plus coloré) : neutral, tonal-spot,
+# content (fidèle à l'image), expressive, monochrome.
+# « auto » (par défaut) : monochrome si l'image est en noir et blanc, sinon
+# tonal-spot. Sans ça, matugen ne trouve aucune couleur dans une image grise et
+# retombe sur son bleu de secours (#adc6ff).
+# Seuil réglable avec monoThreshold ci-dessous.
 #
 # Le reste du système (applis GTK, Firefox, écran de connexion…) garde la
 # palette fixe de Stylix : voir modules/profiles/niri/theme.nix.
@@ -38,13 +42,51 @@ let
 
   stateDir = "${config.xdg.stateHome}/rice";
 
+  # En dessous de ce taux moyen de couleur (0 = gris pur, 100 = très saturé),
+  # le style auto considère l'image comme monochrome. Une image sépia ou
+  # légèrement teintée (≈ 30) garde une palette colorée.
+  monoThreshold = 8;
+
   # Le menu s'ouvre dans une fenêtre de terminal flottante (règle dans niri.nix,
-  # identifiant « rice.wallpaper ») : fzf pour la liste, chafa pour l'aperçu.
+  # identifiant « rice.wallpaper ») : fzf pour la liste, à côté l'aperçu.
+  # Fenêtre opaque, pour que l'aperçu ne se mélange pas avec ce qu'il y a derrière.
+  ghostty = osConfig.rice.terminal == "ghostty";
   openMenu =
-    if osConfig.rice.terminal == "ghostty" then
-      "ghostty --gtk-single-instance=false --quit-after-last-window-closed=true --class=rice.wallpaper -e"
+    if ghostty then
+      "ghostty --gtk-single-instance=false --quit-after-last-window-closed=true --background-opacity=1 --class=rice.wallpaper -e"
     else
-      "foot --app-id=rice.wallpaper";
+      "foot --app-id=rice.wallpaper -o colors-dark.alpha=1.0";
+
+  # Aperçu d'une image dans fzf (méthode recommandée par fzf) :
+  # - Ghostty : kitten icat, qui efface l'image précédente à chaque changement ;
+  # - foot : chafa en Sixel.
+  preview = pkgs.writeShellApplication {
+    name = "wallpaper-preview";
+    runtimeInputs = [
+      pkgs.chafa
+      pkgs.gnused
+    ]
+    ++ lib.optional ghostty pkgs.kitty; # fournit `kitten`
+    text = ''
+      file=$1
+      dim="''${FZF_PREVIEW_COLUMNS}x''${FZF_PREVIEW_LINES}"
+      case "''${TERM:-}" in
+        *ghostty* | *kitty*)
+          # La dernière ligne (code de remise à zéro) est recollée à la précédente,
+          # sinon fzf affiche une barre de défilement. (« $ » de sed, pas des variables.)
+          # shellcheck disable=SC2016
+          kitten icat --clear --transfer-mode=memory --unicode-placeholder --stdin=no \
+            --place="$dim@0x0" "$file" | sed '$d' | sed $'$s/$/\e[m/'
+          ;;
+        foot*)
+          chafa --format sixels --size "$dim" -- "$file"
+          ;;
+        *)
+          chafa --format symbols --size "$dim" -- "$file"
+          ;;
+      esac
+    '';
+  };
 
   # Configuration de matugen : une entrée par modèle déclaré.
   matugenConfig = (pkgs.formats.toml { }).generate "matugen-config.toml" {
@@ -92,7 +134,7 @@ let
       matugen
       awww
       fzf
-      chafa
+      imagemagick # mesure de la couleur de l'image (style auto)
       coreutils
       findutils
       libnotify
@@ -107,11 +149,24 @@ let
         image=$(cat "$state/wallpaper" 2>/dev/null || true)
         if [ -f "$image" ]; then echo "$image"; else echo ${defaultWallpaper}; fi
       }
-      current_scheme() { cat "$state/scheme" 2>/dev/null || echo scheme-tonal-spot; }
+      current_scheme() { cat "$state/scheme" 2>/dev/null || echo auto; }
+
+      # Style auto : taux moyen de couleur (chroma) de l'image, de 0 à 100.
+      resolve_scheme() {
+        if [ "$2" != auto ]; then echo "$2"; return; fi
+        local chroma
+        chroma=$(magick "$1" -resize '64x64!' -colorspace HCL -format '%[fx:int(100*mean.g)]' info: 2>/dev/null || echo 100)
+        if [ "$chroma" -lt ${toString monoThreshold} ]; then
+          echo scheme-monochrome
+        else
+          echo scheme-tonal-spot
+        fi
+      }
 
       # Calcule la palette et remplit les modèles (+ rechargements).
+      # On enregistre le style demandé (auto reste auto pour le prochain fond).
       colors() {
-        matugen image "$1" --mode dark --type "$2" --source-color-index 0 --quiet
+        matugen image "$1" --mode dark --type "$(resolve_scheme "$1" "$2")" --source-color-index 0 --quiet
         echo "$1" > "$state/wallpaper"
         echo "$2" > "$state/scheme"
       }
@@ -121,22 +176,17 @@ let
         colors "$1" "$2"
       }
 
-      # Format d'image compris par le terminal, pour l'aperçu.
-      case "''${TERM:-}" in
-        *ghostty* | *kitty*) export CHAFA_FORMAT=kitty ;;
-        foot*) export CHAFA_FORMAT=sixels ;;
-        *) export CHAFA_FORMAT=symbols ;;
-      esac
-
       pick_scheme() {
         local choice
         choice=$(printf '%s\n' \
+          "Auto (monochrome si l'image est en noir et blanc, sinon doux)" \
           "Doux (tonal-spot)" \
           "Sobre (neutral)" \
           "Fidèle à l'image (content)" \
           "Coloré (expressive)" \
           "Monochrome" | fzf --layout=reverse --prompt="Style de palette > ") || true
         case "$choice" in
+          Auto*) echo auto ;;
           Doux*) echo scheme-tonal-spot ;;
           Sobre*) echo scheme-neutral ;;
           Fid*) echo scheme-content ;;
@@ -162,13 +212,11 @@ let
             exit 0
           fi
           cd "$dir"
-          # Guillemets simples voulus : c'est fzf qui remplit ces variables, pour l'aperçu.
-          # shellcheck disable=SC2016
           choice=$(find . -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) -printf '%P\n' \
             | sort \
             | fzf --layout=reverse --prompt="Fond d'écran > " \
                 --preview-window=right,65% \
-                --preview 'chafa --format "$CHAFA_FORMAT" --size "''${FZF_PREVIEW_COLUMNS}x''${FZF_PREVIEW_LINES}" -- {}') || true
+                --preview "${preview}/bin/wallpaper-preview {}") || true
           [ -z "$choice" ] && exit 0
           scheme=$(pick_scheme)
           [ -z "$scheme" ] && exit 0
@@ -181,7 +229,7 @@ let
           colors "$(current_image)" "$scheme"
           ;;
         set)
-          apply "$2" "''${3:-scheme-tonal-spot}"
+          apply "$2" "''${3:-auto}"
           ;;
         restore)
           apply "$(current_image)" "$(current_scheme)"
