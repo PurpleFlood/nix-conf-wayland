@@ -40,6 +40,9 @@ in
         jdk21
         dotnet-sdk
 
+        # Pomodoro, focus
+        pomodoro
+
         # Rétro-ingénierie
         ghidra
 
