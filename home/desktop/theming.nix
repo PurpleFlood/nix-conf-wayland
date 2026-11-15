@@ -6,9 +6,10 @@
 # Chaque brique est ensuite rechargée.
 #
 # Commande `wallpaper` (aussi Mod+Shift+W) :
-#   wallpaper              choisir un fond dans ~/Images/Wallpapers (aperçu en
-#                          grand : ← → pour défiler, Entrée pour choisir,
-#                          q pour annuler), puis un style
+#   wallpaper              choisir un fond dans ~/Images/Wallpapers, puis un style.
+#                          Petite fenêtre flottante : la liste à gauche, l'aperçu
+#                          de l'image sous le curseur à droite. ↑ ↓ ou taper un
+#                          bout du nom, Entrée pour choisir, Échap pour annuler.
 #   wallpaper style        garder le fond, changer seulement le style de palette
 #   wallpaper set <image> [style]
 #   wallpaper restore      remet le dernier fond (lancé à l'ouverture de session)
@@ -21,6 +22,7 @@
 # palette fixe de Stylix : voir modules/profiles/niri/theme.nix.
 {
   config,
+  osConfig,
   lib,
   pkgs,
   ...
@@ -36,8 +38,13 @@ let
 
   stateDir = "${config.xdg.stateHome}/rice";
 
-  # Menu anyrun (liste sur l'entrée standard → ligne choisie).
-  menu = "${pkgs.anyrun}/bin/anyrun --plugins ${pkgs.anyrun}/lib/libstdin.so --show-results-immediately true";
+  # Le menu s'ouvre dans une fenêtre de terminal flottante (règle dans niri.nix,
+  # identifiant « rice.wallpaper ») : fzf pour la liste, chafa pour l'aperçu.
+  openMenu =
+    if osConfig.rice.terminal == "ghostty" then
+      "ghostty --gtk-single-instance=false --quit-after-last-window-closed=true --class=rice.wallpaper -e"
+    else
+      "foot --app-id=rice.wallpaper";
 
   # Configuration de matugen : une entrée par modèle déclaré.
   matugenConfig = (pkgs.formats.toml { }).generate "matugen-config.toml" {
@@ -84,7 +91,8 @@ let
     runtimeInputs = with pkgs; [
       matugen
       awww
-      imv
+      fzf
+      chafa
       coreutils
       findutils
       libnotify
@@ -113,6 +121,13 @@ let
         colors "$1" "$2"
       }
 
+      # Format d'image compris par le terminal, pour l'aperçu.
+      case "''${TERM:-}" in
+        *ghostty* | *kitty*) export CHAFA_FORMAT=kitty ;;
+        foot*) export CHAFA_FORMAT=sixels ;;
+        *) export CHAFA_FORMAT=symbols ;;
+      esac
+
       pick_scheme() {
         local choice
         choice=$(printf '%s\n' \
@@ -120,7 +135,7 @@ let
           "Sobre (neutral)" \
           "Fidèle à l'image (content)" \
           "Coloré (expressive)" \
-          "Monochrome" | ${menu})
+          "Monochrome" | fzf --layout=reverse --prompt="Style de palette > ") || true
         case "$choice" in
           Doux*) echo scheme-tonal-spot ;;
           Sobre*) echo scheme-neutral ;;
@@ -131,24 +146,36 @@ let
         esac
       }
 
+      # Les menus ont besoin d'un terminal : lancé depuis un raccourci, le script
+      # se relance lui-même dans la fenêtre flottante.
+      in_terminal() {
+        if [ ! -t 0 ]; then
+          exec ${openMenu} "$0" "$@"
+        fi
+      }
+
       case "''${1:-pick}" in
         pick)
+          in_terminal "$@"
           if [ ! -d "$dir" ]; then
             notify-send "Fond d'écran" "Mets tes images dans $dir"
             exit 0
           fi
-          # Aperçu avec imv : Entrée note l'image affichée et ferme la fenêtre.
-          picked=$(mktemp)
-          # (pas de « ; » dans la commande : imv le prendrait comme séparateur)
-          imv -r -c "bind <Return> exec echo \"\$imv_current_file\" > $picked && imv-msg \$imv_pid quit" "$dir" || true
-          choice=$(cat "$picked")
-          rm -f "$picked"
+          cd "$dir"
+          # Guillemets simples voulus : c'est fzf qui remplit ces variables, pour l'aperçu.
+          # shellcheck disable=SC2016
+          choice=$(find . -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) -printf '%P\n' \
+            | sort \
+            | fzf --layout=reverse --prompt="Fond d'écran > " \
+                --preview-window=right,65% \
+                --preview 'chafa --format "$CHAFA_FORMAT" --size "''${FZF_PREVIEW_COLUMNS}x''${FZF_PREVIEW_LINES}" -- {}') || true
           [ -z "$choice" ] && exit 0
           scheme=$(pick_scheme)
           [ -z "$scheme" ] && exit 0
-          apply "$choice" "$scheme"
+          apply "$dir/$choice" "$scheme"
           ;;
         style)
+          in_terminal "$@"
           scheme=$(pick_scheme)
           [ -z "$scheme" ] && exit 0
           colors "$(current_image)" "$scheme"

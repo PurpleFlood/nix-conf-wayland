@@ -98,6 +98,13 @@ in
         };
         clip-to-geometry = true;
       }
+      # Menu des fonds d'écran (commande wallpaper) : fenêtre flottante, au centre.
+      {
+        matches = [ { app-id = "^rice\\.wallpaper$"; } ];
+        open-floating = true;
+        default-column-width.fixed = 1200;
+        default-window-height.fixed = 650;
+      }
     ];
 
     # Capture intégrée : copie dans le presse-papiers ET enregistre ici.
