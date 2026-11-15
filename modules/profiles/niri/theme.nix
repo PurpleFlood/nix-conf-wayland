@@ -22,7 +22,7 @@
       enable = true;
       base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
       # Image de fond de l'écran de connexion, du verrouillage et du menu de démarrage.
-      image = ../../../wallpapers/wallhaven-r7gzzm.jpg;
+      image = ../../../wallpapers/wallhaven-9omgp1.jpg;
       polarity = "dark"; # palette sombre
 
       cursor = {
