@@ -1,6 +1,9 @@
 # WAYBAR : la barre. Lancée automatiquement avec la session (systemd).
-# Couleurs : Stylix. Les clics ouvrent les outils dans le terminal du rice.
+# Couleurs : suivent le fond d'écran (matugen, voir theming.nix) ; le style est
+# le modèle `rice.colorTemplates.waybar` en bas du fichier.
+# Les clics ouvrent les outils dans le terminal du rice.
 {
+  config,
   osConfig,
   lib,
   pkgs,
@@ -138,36 +141,102 @@ in
         on-click = "power-menu";
       };
     };
-    style = ''
-          	window#waybar {
-      	  border-radius: 12px;
-      	}
-      	tooltip {
-      	  border-radius: 10px;
-      	}
-      	.modules-right {
-      	  margin-right: 16px;
-      	}
-      	#custom-power {
-      	  padding: 0 10px 0 6px;
-      	}
-      	      /* Boutons : coins arrondis et transition douce */
-              #workspaces button, #clock, #wireplumber, #bluetooth, #network,
-              #power-profiles-daemon, #battery, #custom-power, #custom-vpn.active {
-                border-radius: 8px;
-                transition: background-color 0.2s ease, color 0.2s ease;
-              }
-              /* Survol : léger fond aux couleurs de la palette */
-              #workspaces button:hover, #clock:hover, #wireplumber:hover,
-              #bluetooth:hover, #network:hover, #power-profiles-daemon:hover,
-              #battery:hover, #custom-vpn.active:hover {
-                background-color: alpha(@base0E, 0.25);
-              }
-              /* Le bouton d'extinction vire au rouge au survol */
-              #custom-power:hover {
-                background-color: alpha(@base08, 0.25);
-                color: @base08;
-              }
-      	'';
+  };
+
+  # Stylix ne touche plus à la barre : couleurs ET style viennent du modèle.
+  stylix.targets.waybar.enable = false;
+
+  # Style de la barre, rempli par matugen → ~/.config/waybar/style.css
+  rice.colorTemplates.waybar = {
+    target = "waybar/style.css";
+    reload = "${pkgs.systemd}/bin/systemctl --user reload waybar.service";
+    text = ''
+      /* Généré par matugen (modèle dans home/desktop/waybar.nix) : ne pas modifier ici. */
+      @define-color bg {{colors.surface.default.hex}};
+      @define-color fg {{colors.on_surface.default.hex}};
+      @define-color muted {{colors.on_surface_variant.default.hex}};
+      @define-color accent {{colors.primary.default.hex}};
+      @define-color accent-alt {{colors.tertiary.default.hex}};
+      @define-color urgent {{colors.error.default.hex}};
+
+      * {
+        font-family: "${config.stylix.fonts.monospace.name}";
+        font-size: ${toString config.stylix.fonts.sizes.desktop}pt;
+      }
+
+      window#waybar {
+        background: alpha(@bg, ${toString config.stylix.opacity.desktop});
+        color: @fg;
+        border-radius: 12px;
+      }
+
+      tooltip {
+        background: @bg;
+        border: 1px solid @accent;
+        border-radius: 10px;
+      }
+      tooltip label {
+        color: @fg;
+      }
+
+      .modules-right {
+        margin-right: 16px;
+      }
+
+      /* Bureaux : soulignés quand ils sont actifs */
+      #workspaces button {
+        color: @muted;
+        border-bottom: 3px solid transparent;
+        padding: 0 5px;
+      }
+      #workspaces button.focused,
+      #workspaces button.active {
+        color: @fg;
+        border-bottom: 3px solid @accent;
+      }
+      #workspaces button.urgent {
+        background-color: @urgent;
+        color: @bg;
+      }
+
+      #window, #clock, #wireplumber, #bluetooth, #network,
+      #power-profiles-daemon, #battery, #custom-vpn {
+        padding: 0 5px;
+      }
+      #wireplumber.muted,
+      #network.disconnected {
+        color: @muted;
+      }
+      #battery.warning {
+        color: @accent-alt;
+      }
+      #battery.critical {
+        color: @urgent;
+      }
+      #custom-vpn.active {
+        color: @accent;
+      }
+      #custom-power {
+        padding: 0 10px 0 6px;
+      }
+
+      /* Boutons : coins arrondis et transition douce */
+      #workspaces button, #clock, #wireplumber, #bluetooth, #network,
+      #power-profiles-daemon, #battery, #custom-power, #custom-vpn.active {
+        border-radius: 8px;
+        transition: background-color 0.2s ease, color 0.2s ease;
+      }
+      /* Survol : léger fond aux couleurs de la palette */
+      #workspaces button:hover, #clock:hover, #wireplumber:hover,
+      #bluetooth:hover, #network:hover, #power-profiles-daemon:hover,
+      #battery:hover, #custom-vpn.active:hover {
+        background-color: alpha(@accent, 0.20);
+      }
+      /* Le bouton d'extinction vire au rouge au survol */
+      #custom-power:hover {
+        background-color: alpha(@urgent, 0.25);
+        color: @urgent;
+      }
+    '';
   };
 }

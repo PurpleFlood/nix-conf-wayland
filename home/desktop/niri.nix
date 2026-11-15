@@ -1,6 +1,7 @@
 # NIRI : fenêtres en colonnes sur un ruban horizontal qu'on fait défiler.
 # Écrit en Nix grâce à niri-flake ; vérifié pendant le rebuild.
-# Couleurs (bordure de la fenêtre active…) : appliquées par Stylix.
+# Couleurs de la bordure des fenêtres : suivent le fond d'écran (matugen, voir
+# theming.nix), via un fichier inclus à la fin de la config (colors.kdl).
 #
 # Logique des raccourcis : Mod = touche Super (Windows).
 #   Mod + flèches / h j k l       se déplacer
@@ -15,8 +16,6 @@
 }:
 
 let
-  wallpaper = config.stylix.image;
-
   # Disposition du clavier : option rice.keyboard (le T470 est en QWERTY).
   keyboard = osConfig.rice.keyboard;
   ghostty = osConfig.rice.terminal == "ghostty";
@@ -84,7 +83,7 @@ in
         { proportion = 2. / 3.; }
       ];
       default-column-width.proportion = 0.5;
-      # Bordure colorée autour des fenêtres (couleurs actives/inactives : Stylix).
+      # Bordure colorée autour des fenêtres (couleurs : colors.kdl, généré par matugen).
       border.width = 2;
     };
 
@@ -104,9 +103,9 @@ in
     # Capture intégrée : copie dans le presse-papiers ET enregistre ici.
     screenshot-path = "~/Images/Captures/%Y-%m-%d_%H-%M-%S.png";
 
-    # Fond d'écran posé au démarrage (le démon awww est lancé par systemd).
+    # Fond d'écran et couleurs remis au démarrage (le démon awww est lancé par systemd).
     spawn-at-startup = [
-      { sh = "sleep 1 && awww img ${wallpaper}"; }
+      { sh = "sleep 1 && wallpaper restore"; }
     ]
     # Ghostty reste chargé en arrière-plan : les fenêtres s'ouvrent instantanément.
     ++ lib.optional ghostty {
@@ -187,6 +186,7 @@ in
       "Print".action.screenshot = [ ];
       "Mod+Print".action.screenshot-window = [ ];
       # Avec annotation : zone → satty → presse-papiers.
+      "Mod+Shift+W".action.spawn = [ "wallpaper" ]; # choisir un fond d'écran (+ palette)
       "Mod+Shift+S".action.spawn-sh = ''grim -g "$(slurp)" - | satty --filename -'';
 
       # ── Son, luminosité, musique (avec affichage swayosd) ──────────
@@ -248,5 +248,39 @@ in
       # ── Session ────────────────────────────────────────────────────
       "Mod+Shift+P".action.power-off-monitors = [ ];
     };
+  };
+
+  # Couleurs de niri générées par matugen : fichier inclus À LA FIN de la config,
+  # pour passer après les couleurs par défaut. niri le relit tout seul quand il change.
+  # (niri-flake n'a pas d'option pour `include` : on ajoute la ligne au fichier final.)
+  xdg.configFile.niri-config.source = lib.mkForce (
+    pkgs.runCommand "config.kdl"
+      {
+        config = config.programs.niri.finalConfig + ''
+
+          // Couleurs générées par matugen (wallpaper)
+          include optional=true "${config.xdg.configHome}/niri/colors.kdl"
+        '';
+        passAsFile = [ "config" ];
+        nativeBuildInputs = [ config.programs.niri.package ];
+      }
+      ''
+        niri validate -c $configPath
+        cp $configPath $out
+      ''
+  );
+
+  rice.colorTemplates.niri = {
+    target = "niri/colors.kdl";
+    text = ''
+      // Généré par matugen (modèle dans home/desktop/niri.nix) : ne pas modifier ici.
+      layout {
+          border {
+              active-color "{{colors.primary.default.hex}}"
+              inactive-color "{{colors.outline_variant.default.hex}}"
+              urgent-color "{{colors.error.default.hex}}"
+          }
+      }
+    '';
   };
 }

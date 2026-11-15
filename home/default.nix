@@ -14,6 +14,7 @@
     ./desktop/notifications.nix # mako
     ./desktop/idle.nix # swayidle (+ gtklock côté système)
     ./desktop/services.nix # fond d'écran, presse-papiers, OSD, lumière bleue, polkit, USB
+    ./desktop/theming.nix # couleurs du rice à chaud, depuis le fond d'écran (matugen)
     ./terminal.nix # foot ou Ghostty + fish, starship, zoxide, carapace
     ./neovim.nix # Neovim + AstroNvim (config dans dotfiles/nvim)
     ./tools.nix # outils de base : CLI, images, vidéo, PDF, captures

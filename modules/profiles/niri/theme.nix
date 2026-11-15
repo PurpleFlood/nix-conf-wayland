@@ -1,8 +1,14 @@
-# THÈME GLOBAL : Stylix tire une palette du fond d'écran et l'applique partout
-# (niri, waybar, foot/Ghostty, mako, GTK, Qt, ReGreet, yazi, zathura…).
+# THÈME GLOBAL : Stylix applique une palette FIXE et sobre au reste du système
+# (applis GTK/Qt, écran de connexion, verrouillage, menu de démarrage, yazi,
+# zathura…), ainsi que les polices, le curseur et l'opacité.
 #
-# Pour changer de fond : remplace wallpapers/fond.jpg (ou change le chemin
-# ci-dessous), puis rebuild — toutes les couleurs suivent.
+# Le rice lui-même (niri, waybar, notifications, lanceur, terminal) suit le fond
+# d'écran à chaud, sans rebuild : voir home/desktop/theming.nix (commande `wallpaper`).
+#
+# Changer la palette fixe : remplace le nom dans base16Scheme, puis rebuild.
+# Quelques choix : catppuccin-mocha, rose-pine, gruvbox-dark-medium, everforest,
+# tokyo-night-dark, kanagawa, nord (liste : ls $(nix build --print-out-paths
+# nixpkgs#base16-schemes)/share/themes).
 {
   config,
   lib,
@@ -14,6 +20,8 @@
   config = lib.mkIf (config.rice.profile == "niri") {
     stylix = {
       enable = true;
+      base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
+      # Image de fond de l'écran de connexion, du verrouillage et du menu de démarrage.
       image = ../../../wallpapers/wallhaven-r7gzzm.jpg;
       polarity = "dark"; # palette sombre
 
