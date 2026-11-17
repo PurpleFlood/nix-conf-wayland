@@ -76,7 +76,7 @@ in
 
         # wallet
         feather
-
+        electrum
         # Compatibilité Windows (Wine en interface graphique)
         bottles
       ];
