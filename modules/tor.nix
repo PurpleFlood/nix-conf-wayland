@@ -63,6 +63,7 @@ let
         meta skuid "tor" accept
         meta mark 0xca6c accept                       # paquets chiffrés du VPN Mullvad (wg-quick)
         oifname "lo" accept
+        ip daddr 127.0.0.0/8 accept                   # connexions redirigées vers Tor
         ${lanAccept}
       }
     }
@@ -72,6 +73,7 @@ let
     name = "anon";
     runtimeInputs = with pkgs; [
       nftables
+      wireguard-tools
       systemd
       curl
       jq
@@ -106,8 +108,7 @@ let
       # Notification sur le bureau de l'utilisateur qui a lancé sudo.
       notify() {
         if [ -n "''${SUDO_UID:-}" ]; then
-          # shellcheck disable=SC2153
-          setpriv --reuid="$SUDO_UID" --regid="$SUDO_GID" --init-groups \
+          setpriv --reuid="$SUDO_UID" --regid="$(id -g "$SUDO_UID")" --init-groups \
             env DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$SUDO_UID/bus" \
             notify-send "Mode anonyme" "$1" >/dev/null 2>&1 || true
         fi
@@ -116,6 +117,10 @@ let
       case "''${1:-status}" in
         start)
           need_root start
+          if [ -n "$(wg show interfaces 2>/dev/null)" ]; then
+            echo "VPN actif : coupe-le d'abord." >&2
+            exit 1
+          fi
           if active || nft list table inet anon >/dev/null 2>&1; then echo "Déjà actif."; exit 0; fi
           systemctl start tor.service
           nft -f ${rules}
