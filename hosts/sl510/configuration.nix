@@ -21,6 +21,7 @@
     simple.desktop = "cinnamon"; # "xfce" si la machine reste lente
     simple.autoUpgrade = false;
     tailscale.enable = true; # pour le dépanner où qu'il soit
+    keyboard = "es";
   };
 
   # BIOS classique (pas d'UEFI) : GRUB sur le disque entier.
