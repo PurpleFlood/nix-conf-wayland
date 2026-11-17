@@ -74,6 +74,9 @@ in
         qbittorrent
         filezilla
 
+        # wallet
+        feather
+
         # Compatibilité Windows (Wine en interface graphique)
         bottles
       ];

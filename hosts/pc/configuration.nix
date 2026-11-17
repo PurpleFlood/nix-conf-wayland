@@ -28,6 +28,7 @@ in
     zen.enable = true;
     searxng.enable = true;
     i2p.enable = true;
+    tor.enable = true;
     vpn.enable = true;
     homeNetwork.enable = true;
   };

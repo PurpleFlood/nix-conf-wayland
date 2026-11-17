@@ -28,6 +28,7 @@
     ./virtualisation.nix # podman, virt-manager
     ./zen.nix # navigateur Zen
     ./searxng.nix # moteur de recherche local
+    ./tor.nix # Module de proxy tor et ajout de tor browser
     ./i2p.nix # réseau anonyme I2P
     ./vpn.nix # commande `vpn` (Mullvad / WireGuard)
     ./home-network.nix # DNS local + certificat (réseau de la maison)
