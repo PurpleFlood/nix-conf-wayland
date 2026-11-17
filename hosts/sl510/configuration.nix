@@ -19,7 +19,7 @@
     profile = "simple";
     user = private.hostUsers.sl510 or "invite"; # son compte (sans sudo), nommé dans le dépôt privé
     simple.desktop = "cinnamon"; # "xfce" si la machine reste lente
-
+    simple.autoUpgrade = false;
     tailscale.enable = true; # pour le dépanner où qu'il soit
   };
 
