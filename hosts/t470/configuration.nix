@@ -12,7 +12,7 @@
   rice = {
     keyboard = "us"; # clavier physique en QWERTY
     terminal = "ghostty";
-
+    tailscale.enable = true;
     apps.enable = true;
     dev.enable = true;
     music.enable = true;
