@@ -279,11 +279,11 @@
     "private": {
       "flake": false,
       "locked": {
-        "lastModified": 1794599989,
-        "narHash": "sha256-T0Hw4VZc+7XD4gyKENF6JMy+fUG9cUBMW4lSz3fq+bY=",
+        "lastModified": 1794945222,
+        "narHash": "sha256-IhSEjUmC3HZ6WFtzb+88kl3WL3Pg289+0RKwdl2D1fA=",
         "ref": "refs/heads/master",
-        "rev": "68b30e3cb35739d0bf4ebfb9bfa19ed3481a9905",
-        "revCount": 2,
+        "rev": "325d15162090731e0b8b84996228dac3819516ca",
+        "revCount": 4,
         "type": "git",
         "url": "ssh://git@github.com/PurpleFlood/nix-private"
       },
