@@ -47,6 +47,7 @@ in
 
   # ─── Wi-Fi : clé USB Realtek (pilote morrownr) ──────────────────────────
   boot.extraModulePackages = [ wifi ];
+  hardware.usb-modeswitch.enable = true;
   # Les pilotes rtw89 du noyau ne doivent pas prendre la clé.
   boot.blacklistedKernelModules = [
     "rtw89_core"

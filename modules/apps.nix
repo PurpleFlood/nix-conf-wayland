@@ -50,6 +50,9 @@ in
         keepassxc
         nextcloud-client
 
+        # Mail
+        tutanota-desktop
+
         # Création
         blender
         krita
