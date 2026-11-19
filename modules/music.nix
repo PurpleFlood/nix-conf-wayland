@@ -5,7 +5,12 @@
 # Les plugins installés ici sont rangés dans /run/current-system/sw/lib/ :
 #   vst3/  clap/  lv2/  vst/
 # À indiquer une fois dans Reaper : Préférences → Plug-ins → VST / CLAP / LV2.
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   # Wine dédié aux plugins Windows (Kilohearts…), dans son propre préfixe
@@ -111,6 +116,10 @@ in
 
     # ─── Côté utilisateur ─────────────────────────────────────────────────
     home-manager.users.${config.rice.user} = {
+
+      # partie equaliseur pour le son
+      services.easyeffects.enable = true;
+
       home.packages = [ bitwig ];
 
       # Raccourcis du lanceur (les paquets n'en fournissent pas)
