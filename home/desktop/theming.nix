@@ -11,7 +11,7 @@
 #                          de l'image sous le curseur à droite. ↑ ↓ ou taper un
 #                          bout du nom, Entrée pour choisir, Échap pour annuler.
 #   wallpaper style        garder le fond, changer seulement le style de palette
-#   wallpaper set <image> [style]   (style par défaut : auto)
+#   wallpaper set <fichier> [style]   (style par défaut : auto)
 #   wallpaper restore      remet le dernier fond (lancé à l'ouverture de session)
 #   wallpaper colors       recalcule seulement les couleurs (lancé à chaque rebuild)
 #
@@ -21,6 +21,12 @@
 # tonal-spot. Sans ça, matugen ne trouve aucune couleur dans une image grise et
 # retombe sur son bleu de secours (#adc6ff).
 # Seuil réglable avec monoThreshold ci-dessous.
+#
+# Fonds animés : dans le même dossier, des GIF (animés par awww) ou des vidéos
+# MP4 / WebM / MKV / MOV (jouées en boucle par mpvpaper, sans le son). Une image
+# fixe en est extraite une fois (ffmpeg, gardée dans ~/.cache/rice/posters) pour
+# l'aperçu du menu et pour les couleurs. La vidéo se met en pause quand elle est
+# cachée, et sur batterie (portables) c'est cette image fixe qui est affichée.
 #
 # Le reste du système (applis GTK, Firefox, écran de connexion…) garde la
 # palette fixe de Stylix : voir modules/profiles/niri/theme.nix.
@@ -41,6 +47,11 @@ let
   defaultWallpaper = ../../wallpapers/wallhaven-r7gzzm.jpg;
 
   stateDir = "${config.xdg.stateHome}/rice";
+  posterDir = "${config.xdg.cacheHome}/rice/posters";
+
+  # Options de mpv pour les fonds vidéo : sans le son, en boucle, décodage par la
+  # carte graphique, image recadrée pour remplir l'écran.
+  mpvOptions = "no-audio loop-file=inf hwdec=auto panscan=1.0";
 
   # En dessous de ce taux moyen de couleur (0 = gris pur, 100 = très saturé),
   # le style auto considère l'image comme monochrome. Une image sépia ou
@@ -57,6 +68,39 @@ let
     else
       "foot --app-id=rice.wallpaper -o colors-dark.alpha=1.0";
 
+  # Image fixe d'un fond : l'image elle-même, ou une image extraite (GIF, vidéo).
+  # Affiche le chemin de l'image à utiliser.
+  poster = pkgs.writeShellApplication {
+    name = "wallpaper-poster";
+    runtimeInputs = with pkgs; [
+      ffmpeg-headless
+      imagemagick
+      coreutils
+    ];
+    text = ''
+      file=$1
+      case "''${file,,}" in
+        *.mp4 | *.webm | *.mkv | *.mov | *.gif) ;;
+        *) echo "$file"; exit 0 ;;
+      esac
+      mkdir -p ${lib.escapeShellArg posterDir}
+      # Nom unique selon le fichier et sa date : refait si la vidéo change.
+      key=$(printf '%s %s' "$file" "$(stat -c %Y "$file")" | sha1sum | cut -c1-16)
+      out=${lib.escapeShellArg posterDir}/$key.jpg
+      if [ ! -s "$out" ]; then
+        case "''${file,,}" in
+          *.gif) magick "''${file}[0]" "$out" 2>/dev/null || true ;;
+          *)
+            # Image prise à 1 s (le tout début est souvent noir), sinon la première.
+            ffmpeg -loglevel error -y -ss 1 -i "$file" -frames:v 1 "$out" 2>/dev/null \
+              || ffmpeg -loglevel error -y -i "$file" -frames:v 1 "$out" 2>/dev/null || true
+            ;;
+        esac
+      fi
+      if [ -s "$out" ]; then echo "$out"; else echo "$file"; fi
+    '';
+  };
+
   # Aperçu d'une image dans fzf (méthode recommandée par fzf) :
   # - Ghostty : kitten icat, qui efface l'image précédente à chaque changement ;
   # - foot : chafa en Sixel.
@@ -68,7 +112,7 @@ let
     ]
     ++ lib.optional ghostty pkgs.kitty; # fournit `kitten`
     text = ''
-      file=$1
+      file=$(${poster}/bin/wallpaper-poster "$1")
       dim="''${FZF_PREVIEW_COLUMNS}x''${FZF_PREVIEW_LINES}"
       case "''${TERM:-}" in
         *ghostty* | *kitty*)
@@ -133,11 +177,13 @@ let
     runtimeInputs = with pkgs; [
       matugen
       awww
+      mpvpaper # fonds vidéo
       fzf
       imagemagick # mesure de la couleur de l'image (style auto)
       coreutils
       findutils
       libnotify
+      systemd # systemd-run : la vidéo continue après la fermeture du menu
     ];
     text = ''
       state=${lib.escapeShellArg stateDir}
@@ -164,15 +210,58 @@ let
       }
 
       # Calcule la palette et remplit les modèles (+ rechargements).
+      # Pour un GIF ou une vidéo, les couleurs viennent de son image fixe.
       # On enregistre le style demandé (auto reste auto pour le prochain fond).
       colors() {
-        matugen image "$1" --mode dark --type "$(resolve_scheme "$1" "$2")" --source-color-index 0 --quiet
+        local still
+        still=$(${poster}/bin/wallpaper-poster "$1")
+        matugen image "$still" --mode dark --type "$(resolve_scheme "$still" "$2")" --source-color-index 0 --quiet
         echo "$1" > "$state/wallpaper"
         echo "$2" > "$state/scheme"
       }
 
+      is_video() {
+        case "''${1,,}" in
+          *.mp4 | *.webm | *.mkv | *.mov) return 0 ;;
+          *) return 1 ;;
+        esac
+      }
+
+      # Sur batterie : un portable dont aucune alimentation secteur n'est branchée.
+      # (Un PC fixe n'a pas d'entrée « Mains » : jamais sur batterie.)
+      on_battery() {
+        local supply found=false
+        for supply in /sys/class/power_supply/*; do
+          [ "$(cat "$supply/type" 2>/dev/null)" = Mains ] || continue
+          found=true
+          [ "$(cat "$supply/online" 2>/dev/null)" = 1 ] && return 1
+        done
+        $found
+      }
+
+      # mpvpaper tourne dans un service systemd temporaire (rice-video-wallpaper),
+      # au-dessus de l'image d'awww (couche « bottom »).
+      stop_video() {
+        systemctl --user stop rice-video-wallpaper.service 2>/dev/null || true
+      }
+      start_video() {
+        stop_video
+        systemd-run --user --quiet --collect --unit=rice-video-wallpaper \
+          ${pkgs.mpvpaper}/bin/mpvpaper --auto-pause --layer bottom -o ${lib.escapeShellArg mpvOptions} '*' "$1"
+      }
+
       apply() {
-        awww img "$1" --transition-type fade || true
+        # awww affiche toujours une image : le GIF lui-même (il l'anime), sinon
+        # l'image fixe. Sous une vidéo, c'est aussi ce qui reste si elle s'arrête.
+        case "''${1,,}" in
+          *.gif) awww img "$1" --transition-type fade || true ;;
+          *) awww img "$(${poster}/bin/wallpaper-poster "$1")" --transition-type fade || true ;;
+        esac
+        if is_video "$1" && ! on_battery; then
+          start_video "$1"
+        else
+          stop_video
+        fi
         colors "$1" "$2"
       }
 
@@ -212,7 +301,8 @@ let
             exit 0
           fi
           cd "$dir"
-          choice=$(find . -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) -printf '%P\n' \
+          choice=$(find . -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \
+              -o -iname '*.gif' -o -iname '*.mp4' -o -iname '*.webm' -o -iname '*.mkv' -o -iname '*.mov' \) -printf '%P\n' \
             | sort \
             | fzf --layout=reverse --prompt="Fond d'écran > " \
                 --preview-window=right,65% \
@@ -238,7 +328,7 @@ let
           colors "$(current_image)" "$(current_scheme)"
           ;;
         *)
-          echo "usage : wallpaper [pick|style|set <image> [style]|restore|colors]" >&2
+          echo "usage : wallpaper [pick|style|set <fichier> [style]|restore|colors]" >&2
           exit 1
           ;;
       esac
