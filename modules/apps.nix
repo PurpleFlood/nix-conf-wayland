@@ -51,7 +51,7 @@ in
         nextcloud-client
 
         # Mail
-        tutanota-desktop
+        thunderbird
 
         # Création
         blender
