@@ -246,8 +246,11 @@ let
       }
       start_video() {
         stop_video
-        systemd-run --user --quiet --collect --unit=rice-video-wallpaper \
-          ${pkgs.mpvpaper}/bin/mpvpaper --auto-pause --layer bottom -o ${lib.escapeShellArg mpvOptions} '*' "$1"
+        # Plafond mémoire : mpvpaper fuit sur la durée. Au-delà de 1 Go, systemd
+        # l'arrête et le relance (2 s plus tard) : la vidéo repart, la mémoire aussi.
+          systemd-run --user --quiet --collect --unit=rice-video-wallpaper \
+            -p MemoryMax=1G -p MemorySwapMax=0 -p Restart=always -p RestartSec=2 \
+              ${pkgs.mpvpaper}/bin/mpvpaper --auto-pause --layer bottom -o ${lib.escapeShellArg mpvOptions} '*' "$1"
       }
 
       apply() {
@@ -373,9 +376,7 @@ in
     xdg.configFile = {
       "matugen/config.toml".source = matugenConfig;
     }
-    // lib.mapAttrs' (
-      name: t: lib.nameValuePair "matugen/templates/${name}" { inherit (t) text; }
-    ) cfg;
+    // lib.mapAttrs' (name: t: lib.nameValuePair "matugen/templates/${name}" { inherit (t) text; }) cfg;
 
     # À chaque rebuild : recalcule les couleurs avec les modèles à jour
     # (après la mise en place des liens de home-manager, pour écrire au bon endroit).
