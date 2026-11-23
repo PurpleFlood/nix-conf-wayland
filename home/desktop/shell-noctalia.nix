@@ -12,4 +12,20 @@
 {
   # Le paquet embarque ce qu'il utilise (brightnessctl, cliphist, wlsunset, ddcutil).
   home.packages = [ pkgs.noctalia-shell ];
+
+  # Lancé avec la session graphique (et relancé s'il plante), comme waybar.
+  # (Lancé directement par niri, il démarrait trop tôt et restait invisible.)
+  systemd.user.services.noctalia-shell = {
+    Unit = {
+      Description = "Noctalia Shell";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.noctalia-shell}/bin/noctalia-shell";
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
 }

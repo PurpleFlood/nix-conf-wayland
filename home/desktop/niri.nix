@@ -123,10 +123,9 @@ in
     screenshot-path = "~/Images/Captures/%Y-%m-%d_%H-%M-%S.png";
 
     # Classique : fond d'écran et couleurs remis au démarrage (démon awww lancé par systemd).
-    # Noctalia : lancé ici (barre, notifications, fond d'écran…).
-    spawn-at-startup = [
-      (pick { sh = "sleep 1 && wallpaper restore"; } { command = [ "noctalia-shell" ]; })
-    ]
+    # Noctalia : lancé par son service systemd (home/desktop/shell-noctalia.nix).
+    spawn-at-startup =
+      lib.optional classic { sh = "sleep 1 && wallpaper restore"; }
     # Ghostty reste chargé en arrière-plan : les fenêtres s'ouvrent instantanément.
     ++ lib.optional ghostty {
       command = [
