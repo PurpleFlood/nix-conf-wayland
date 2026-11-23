@@ -40,6 +40,9 @@ in
         jdk21
         dotnet-sdk
 
+        # Notes
+        cherrytree
+
         # Pomodoro, focus
         pomodoro
 

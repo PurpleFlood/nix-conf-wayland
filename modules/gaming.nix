@@ -4,7 +4,12 @@
 #
 #   rice.gaming.enable = true;
 #   rice.gaming.geforceNow = false;   # pour ne pas installer GeForce NOW
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   # Lien direct vers un fichier du dépôt : modifiable sans rebuild.
@@ -49,6 +54,9 @@ in
     programs.gamemode.enable = true;
     programs.gamescope.enable = true;
 
+    # Android (Waydroid) : jeux mobiles sur PC
+    virtualisation.waydroid.enable = true;
+    virtualisation.waydroid.package = pkgs.waydroid-nftables;
     # ─── GeForce NOW ──────────────────────────────────────────────────────
     # NVIDIA ne le distribue qu'en Flatpak, depuis son propre dépôt. Ce service
     # l'installe 2 minutes après le démarrage (sans ralentir le boot), puis le
