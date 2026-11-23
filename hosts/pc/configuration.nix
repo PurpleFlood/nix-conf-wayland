@@ -16,6 +16,7 @@ in
   # ─── Modules et réglages du rice ───────────────────────────────────────
   rice = {
     terminal = "ghostty";
+    noctalia.enable = true; # entrée « noctalia » en plus au démarrage
     greeterDisabledOutputs = [ "DP-1" ]; # ReGreet seulement sur l'écran HDMI
 
     apps.enable = true;

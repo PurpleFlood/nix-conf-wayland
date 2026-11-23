@@ -9,9 +9,8 @@
 {
   imports = [
     ./desktop/niri.nix # compositeur : fenêtres, raccourcis, écrans
-    ./desktop/waybar.nix # barre
-    ./desktop/launcher.nix # anyrun : lanceur + menus (presse-papiers, extinction)
-    ./desktop/notifications.nix # mako
+    # Barre, lanceur, notifications : desktop/shell-classic.nix ou
+    # desktop/shell-noctalia.nix, choisi par le profil (option rice.shell).
     ./desktop/idle.nix # swayidle (+ gtklock côté système)
     ./desktop/services.nix # fond d'écran, presse-papiers, OSD, lumière bleue, polkit, USB
     ./desktop/theming.nix # couleurs du rice à chaud, depuis le fond d'écran (matugen)

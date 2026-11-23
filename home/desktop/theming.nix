@@ -62,6 +62,8 @@ let
   # identifiant « rice.wallpaper ») : fzf pour la liste, à côté l'aperçu.
   # Fenêtre opaque, pour que l'aperçu ne se mélange pas avec ce qu'il y a derrière.
   ghostty = osConfig.rice.terminal == "ghostty";
+  # Avec Noctalia, c'est lui qui gère fonds d'écran et couleurs.
+  classic = osConfig.rice.shell == "classic";
   openMenu =
     if ghostty then
       "ghostty --gtk-single-instance=false --quit-after-last-window-closed=true --background-opacity=1 --class=rice.wallpaper -e"
@@ -367,7 +369,7 @@ in
     );
   };
 
-  config = {
+  config = lib.mkIf classic {
     home.packages = [
       pkgs.matugen
       wallpaper

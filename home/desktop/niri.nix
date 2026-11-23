@@ -20,6 +20,18 @@ let
   keyboard = osConfig.rice.keyboard;
   ghostty = osConfig.rice.terminal == "ghostty";
 
+  # Rice choisi (option rice.shell) : les raccourcis appellent anyrun, waybar,
+  # gtklock… ou Noctalia. Commande Noctalia : noctalia "launcher" "toggle".
+  classic = osConfig.rice.shell == "classic";
+  noctalia = args: [
+    "noctalia-shell"
+    "ipc"
+    "call"
+  ]
+  ++ args;
+  # Raccourci qui change selon le rice : choix classic / noctalia.
+  pick = forClassic: forNoctalia: if classic then forClassic else forNoctalia;
+
   # Touches de la rangée des chiffres pour les bureaux 1 à 5.
   workspaceKeys =
     if keyboard == "fr" then
@@ -110,9 +122,10 @@ in
     # Capture intégrée : copie dans le presse-papiers ET enregistre ici.
     screenshot-path = "~/Images/Captures/%Y-%m-%d_%H-%M-%S.png";
 
-    # Fond d'écran et couleurs remis au démarrage (le démon awww est lancé par systemd).
+    # Classique : fond d'écran et couleurs remis au démarrage (démon awww lancé par systemd).
+    # Noctalia : lancé ici (barre, notifications, fond d'écran…).
     spawn-at-startup = [
-      { sh = "sleep 1 && wallpaper restore"; }
+      (pick { sh = "sleep 1 && wallpaper restore"; } { command = [ "noctalia-shell" ]; })
     ]
     # Ghostty reste chargé en arrière-plan : les fenêtres s'ouvrent instantanément.
     ++ lib.optional ghostty {
@@ -136,20 +149,48 @@ in
           ]
         else
           [ "foot" ];
-      "Mod+D".action.spawn = "anyrun";
+      "Mod+D".action.spawn = pick "anyrun" (noctalia [
+        "launcher"
+        "toggle"
+      ]);
       "Mod+E".action.spawn-sh = "${osConfig.rice.terminalExec} yazi";
       "Mod+Shift+E".action.spawn = "thunar";
-      "Mod+V".action.spawn = "clipboard-menu"; # historique (home/desktop/launcher.nix)
-      "Mod+Shift+Escape".action.spawn = "power-menu";
-      "Mod+Alt+L".action.spawn = "gtklock";
+      "Mod+V".action.spawn = pick "clipboard-menu" (noctalia [
+        "launcher"
+        "clipboard"
+      ]); # historique du presse-papiers
+      "Mod+Shift+Escape".action.spawn = pick "power-menu" (noctalia [
+        "sessionMenu"
+        "toggle"
+      ]); # éteindre, redémarrer, se déconnecter
+      "Mod+Alt+L".action.spawn = pick "gtklock" (noctalia [
+        "lockScreen"
+        "lock"
+      ]);
       "Mod+Shift+Slash".action.show-hotkey-overlay = [ ]; # aide des raccourcis
-      "Mod+B".action.spawn = [
+      "Mod+B".action.spawn = pick [
         "systemctl"
         "--user"
         "kill"
         "--signal=SIGUSR1"
         "waybar.service"
-      ]; # masquer / afficher la barre
+      ] (noctalia [
+        "bar"
+        "toggle"
+      ]); # masquer / afficher la barre
+    }
+    # Noctalia seulement : panneau de contrôle et réglages.
+    // lib.optionalAttrs (!classic) {
+      "Mod+N".action.spawn = noctalia [
+        "controlCenter"
+        "toggle"
+      ];
+      "Mod+Shift+N".action.spawn = noctalia [
+        "settings"
+        "toggle"
+      ];
+    }
+    // {
 
       # ── Fenêtres ───────────────────────────────────────────────────
       "Mod+Q".action.close-window = [ ];
@@ -193,52 +234,73 @@ in
       "Print".action.screenshot = [ ];
       "Mod+Print".action.screenshot-window = [ ];
       # Avec annotation : zone → satty → presse-papiers.
-      "Mod+Shift+W".action.spawn = [ "wallpaper" ]; # choisir un fond d'écran (+ palette)
+      "Mod+Shift+W".action.spawn = pick [ "wallpaper" ] (noctalia [
+        "wallpaper"
+        "toggle"
+      ]); # choisir un fond d'écran (+ palette)
       "Mod+Shift+S".action.spawn-sh = ''grim -g "$(slurp)" - | satty --filename -'';
 
-      # ── Son, luminosité, musique (avec affichage swayosd) ──────────
+      # ── Son, luminosité, musique (affichage : swayosd ou Noctalia) ─
       "XF86AudioRaiseVolume" = {
         allow-when-locked = true;
-        action.spawn = [
+        action.spawn = pick [
           "swayosd-client"
           "--output-volume"
           "raise"
-        ];
+        ] (noctalia [
+          "volume"
+          "increase"
+        ]);
       };
       "XF86AudioLowerVolume" = {
         allow-when-locked = true;
-        action.spawn = [
+        action.spawn = pick [
           "swayosd-client"
           "--output-volume"
           "lower"
-        ];
+        ] (noctalia [
+          "volume"
+          "decrease"
+        ]);
       };
       "XF86AudioMute" = {
         allow-when-locked = true;
-        action.spawn = [
+        action.spawn = pick [
           "swayosd-client"
           "--output-volume"
           "mute-toggle"
-        ];
+        ] (noctalia [
+          "volume"
+          "muteOutput"
+        ]);
       };
       "XF86AudioMicMute" = {
         allow-when-locked = true;
-        action.spawn = [
+        action.spawn = pick [
           "swayosd-client"
           "--input-volume"
           "mute-toggle"
-        ];
+        ] (noctalia [
+          "volume"
+          "muteInput"
+        ]);
       };
-      "XF86MonBrightnessUp".action.spawn = [
+      "XF86MonBrightnessUp".action.spawn = pick [
         "swayosd-client"
         "--brightness"
         "raise"
-      ];
-      "XF86MonBrightnessDown".action.spawn = [
+      ] (noctalia [
+        "brightness"
+        "increase"
+      ]);
+      "XF86MonBrightnessDown".action.spawn = pick [
         "swayosd-client"
         "--brightness"
         "lower"
-      ];
+      ] (noctalia [
+        "brightness"
+        "decrease"
+      ]);
       "XF86AudioPlay".action.spawn = [
         "playerctl"
         "play-pause"
