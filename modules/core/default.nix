@@ -8,5 +8,6 @@
   imports = [
     ./options.nix # profil, comptes, clavier
     ./system.nix # Nix, langue, comptes, réseau, son, matériel
+    ./dns.nix # DNS chiffré (DNS over HTTPS) via dnscrypt-proxy
   ];
 }
