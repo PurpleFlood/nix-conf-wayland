@@ -16,8 +16,12 @@ in
   # ─── Modules et réglages du rice ───────────────────────────────────────
   rice = {
     terminal = "ghostty";
-    noctalia.enable = true; # entrée « noctalia » en plus au démarrage
-    greeterDisabledOutputs = [ "DP-1" ]; # ReGreet seulement sur l'écran HDMI
+    # noctalia.enable = true; # entrée « noctalia » en plus au démarrage
+    shell = "noctalia"; # rice par défaut (« classic » pour revenir à waybar, anyrun…)
+    greeterDisabledOutputs = [
+      "DP-1"
+      "HDMI-A-2"
+    ]; # ReGreet seulement sur l'écran HDMI
 
     apps.enable = true;
     dev.enable = true;

@@ -33,6 +33,20 @@
       focus-at-startup = true; # écran principal
     };
     # Le 3ᵉ écran viendra ici.
+    # Écran de droite, à la verticale. Branché en VGA via un adaptateur HDMI :
+    # niri voit l'adaptateur (« PNP(RGT) »), pas le Samsung S22E450.
+    "HDMI-A-2" = {
+      mode = {
+        width = 1440;
+        height = 900;
+        refresh = 59.95; # à ajuster selon la liste de l'adaptateur
+      };
+      transform.rotation = 90; # vertical (270 si l'image est à l'envers)
+      position = {
+        x = 3600; # à droite de l'écran du milieu (1680 + 1920)
+        y = 0;
+      };
+    };
   };
 
   # Bureaux 1 à 5 sur l'écran principal (HDMI), 6 à 8 sur l'écran secondaire (DP).
