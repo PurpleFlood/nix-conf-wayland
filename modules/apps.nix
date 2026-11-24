@@ -44,7 +44,7 @@ in
         pidgin
 
         # Bureautique / notes
-        libreoffice
+        onlyoffice-desktopeditors
         anytype
         obsidian
         keepassxc

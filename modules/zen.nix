@@ -14,6 +14,7 @@
 let
   common = import ../home/browsers/browser-common.nix {
     searxng = config.rice.searxng.enable;
+    activitywatch = config.rice.activitywatch.enable;
   };
 
   # Favoris : exportés à la fermeture, réimportés au démarrage, dans ton clone

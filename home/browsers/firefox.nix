@@ -3,7 +3,10 @@
 { config, osConfig, ... }:
 
 let
-  common = import ./browser-common.nix { searxng = osConfig.rice.searxng.enable; };
+  common = import ./browser-common.nix {
+    searxng = osConfig.rice.searxng.enable;
+    activitywatch = osConfig.rice.activitywatch.enable;
+  };
 in
 {
   programs.firefox = {

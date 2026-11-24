@@ -33,5 +33,6 @@
     ./vpn.nix # commande `vpn` (Mullvad / WireGuard)
     ./home-network.nix # DNS local + certificat (réseau de la maison)
     ./tailscale.nix # accès à distance à la machine, où qu'elle soit
+    ./activitywatch.nix # suivi du temps passé (applis, fenêtres, sites), en local
   ];
 }

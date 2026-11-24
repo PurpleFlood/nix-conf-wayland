@@ -31,6 +31,7 @@ in
     i2p.enable = true;
     tor.enable = true;
     vpn.enable = true;
+    activitywatch.enable = true;
     homeNetwork.enable = true;
   };
 

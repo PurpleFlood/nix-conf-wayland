@@ -4,7 +4,12 @@
 #
 # `searxng` : vrai si le module searxng est actif sur la machine ; sinon la
 # recherche par défaut passe sur DuckDuckGo.
-{ searxng }:
+# `activitywatch` : vrai si le module activitywatch est actif ; ajoute alors
+# l'extension aw-watcher-web (sites visités), jamais en navigation privée.
+{
+  searxng,
+  activitywatch ? false,
+}:
 
 let
   # Installe une extension depuis addons.mozilla.org, toujours à jour.
@@ -45,7 +50,31 @@ in
       (extension "keepassxc-browser@keepassxc.org" "keepassxc-browser")
       (extension "{762f9885-5a13-4abd-9c77-433dcd38b8fd}" "return-youtube-dislikes")
       (extension "{446900e4-71c2-419f-a6a7-df9c091e268b}" "bitwarden-password-manager")
-    ];
+    ]
+    // builtins.listToAttrs (
+      if activitywatch then
+        [
+          (
+            let
+              e = extension "{ef87d84c-2127-493f-b952-5b4e744245bc}" "aw-watcher-web";
+            in
+            e
+            // {
+              value = e.value // {
+                private_browsing = false; # rien n'est suivi en navigation privée
+              };
+            }
+          )
+        ]
+      else
+        [ ]
+    );
+
+    # aw-watcher-web : accepte d'office son avertissement « données collectées en
+    # local » (sinon il reste inactif jusqu'à un clic dans ses réglages).
+    "3rdparty".Extensions = if activitywatch then {
+      "{ef87d84c-2127-493f-b952-5b4e744245bc}".consentOfflineDataCollection = true;
+    } else { };
 
     DisableTelemetry = true;
     DisableFirefoxStudies = true;
