@@ -49,6 +49,8 @@ in
         # Rétro-ingénierie
         ghidra
 
+        cursor-cli
+
         # Automatisation
         ansible
 
